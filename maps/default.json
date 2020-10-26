@@ -1,10 +1,13 @@
 {
-    "name": "Default Map", 
+    "name": "Default Map",  
+    "width": 9,
+    "height": 5,
     "map": [
-        "111111111",
-        "120000001",
-        "100000001",
-        "100000021",
-        "111111111"
-    ]
+        "wwwwwwwww",
+        "wpaawaaaw",
+        "waaaaaaaw",
+        "wawaaaaaw",
+        "wwwwwwwww"
+    ],
+    "orientation": [90]
 }   
