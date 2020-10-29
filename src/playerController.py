@@ -10,6 +10,7 @@ class PlayerController(tankController.TankController):
     def __init__(self, object_id):
         super().__init__(object_id)
         self._bit_key = keyBind.KeyBind()
+        self._turn_angle = math.pi/45
     def forward(self, grid):
         tank = grid.get_object(self._object_id)
         if tank.velocity < 8: tank.velocity += 1
@@ -22,17 +23,18 @@ class PlayerController(tankController.TankController):
     
     def reverse(self, grid):
         tank = grid.get_object(self._object_id)
-        if tank.velocity >= -4: tank.velocity -= 2
+        if tank.velocity > 0: tank.velocity -= 4
+        if tank.velocity <= 0: tank.velocity = -2
         grid.move_object(self.object_id, tank.velocity)
     
     def rotate_left(self, grid):
         tank = grid.get_object(self._object_id)
-        angle = -math.pi/60
+        angle = -self._turn_angle
         grid.rotate_object(self.object_id, angle)
 
     def rotate_right(self, grid):
         tank = grid.get_object(self._object_id)
-        angle = math.pi/60
+        angle = self._turn_angle
         grid.rotate_object(self.object_id, angle)
 
     def shoot(self, grid):

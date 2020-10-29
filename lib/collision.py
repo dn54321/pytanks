@@ -123,7 +123,9 @@ def _point_in_object(point, obj):
 def _point_in_line(point, line):
     (x0,y0),(x2,y2) = line
     x1, y1 = point
-    if (x0<=x1<=x2 and y0<=y1<=y2) or (x2<=x1<=x0 and y2<=y1<=y0): 
+    if x0>x2: x0,x2=x2,x0
+    if y0>y2: y0,y2=y2,y0
+    if (x0<=x1<=x2 and y0<=y1<=y2): 
         return True
     return False
 
