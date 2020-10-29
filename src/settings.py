@@ -10,13 +10,16 @@ class Settings:
             self = Settings._instance
         else:
             Settings._instance = self
-            self._config = configparser.configParser()
+            self._config = configparser.ConfigParser()
             try: 
                 self._config.read('settings.ini')
             except: 
                 self.generate_settings()
-            self._actions = ['turn_left', 'turn_right', 'accelerate', 'decelerate', 'shoot']
-    
+            self._actions = ['accelerate', 'decelerate', 'turn_left', 'turn_right', 'shoot']
+        for key, value in self._config['key_bindings'].items():
+            if value == 'space':
+                self._config['key_bindings'][key] = ' '
+
     def generate_settings(self):
         print("[WARNING] Found corrupted or missing 'settings.ini'. Generating new file.")
         self._config['settings'] = {
@@ -33,7 +36,6 @@ class Settings:
         with open('settings.ini', 'w') as config_file:
             self._config.write(config_file)
         self._config.read('settings.ini')
-
     def get_ord(self):
         try:
             keys = self._config['key_bindings']

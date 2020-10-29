@@ -7,8 +7,7 @@ class Tank(gameObject.GameObject):
         sz = constant.TANK_SIZE/2
         gz = constant.GRID_SIZE
         x,y = x*gz+gz/2, y*gz+gz/2
-        x0,y0,x1,y1 = x-sz,y-sz,x1+sz,y1+sz
-        hitbox = [(x1,y0), (x1,y1), (x0,y1), (x0,y0)]
+        hitbox = [(sz,-sz), (sz,sz), (-sz,sz), (-sz,-sz)]
         super().__init__(x, y, hitbox)
         self._velocity = 0
         self._acceleration = 1
@@ -17,7 +16,7 @@ class Tank(gameObject.GameObject):
     
     def on_collide(self, o):
         if isinstance(o, gameTile.GameTile): return constant.REVERSE
-        if isinstance(o, bullet.Bullets): return constant.DESTRUCT
+        if isinstance(o, bullet.Bullet): return constant.DESTRUCT
         return constant.REVERSE
 
     def get_velocity(self):

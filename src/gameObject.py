@@ -9,7 +9,7 @@ class GameObject(abc.ABC):
         self._x = x
         self._y = y
         self._hitbox = hitbox
-        self._area = self._area()
+        self._area = self._get_area()
         self._radius = self._get_radius()
         self._stationary = stationary
         self._angle = 0
@@ -18,20 +18,18 @@ class GameObject(abc.ABC):
         pass
 
     def rotate(self, angle):
-        hitbox = []
-        for x,y in self._hitbox:
-            x = x*math.cos(angle) - y*math.cos(angle)
-            y = x*math.sin(angle) - y*math.cos(angle)
-            hitbox.append((x,y))
-        self._hitbox = hitbox
-        self._angle = (self._angle + angle) % math.tau
+        self._hitbox = VMath.rotate(self._hitbox, angle)
+        self._angle = (math.tau + self._angle + angle) % math.tau
 
-    def move(self, x, y):
-        self._x += x
-        self._y += y
+    def move(self, distance):
+        self.position = VMath.translate(self.position, distance, self._angle)
 
-    def get_hitbox(self):
-        hitbox = [(x+self._x,y+self._y) for x,y in self._hitbox]
+    def get_hitbox(self, to_int=False, get_raw=False):
+        if get_raw: return self._hitbox
+        if to_int:
+            hitbox = [(int(round(x+self._x)),int(round(y+self._y))) for x,y in self._hitbox]
+        else:
+            hitbox = [(x+self._x,y+self._y) for x,y in self._hitbox]
         return hitbox
     
     def set_hitbox(self, hitbox):
@@ -67,14 +65,14 @@ class GameObject(abc.ABC):
     def _get_radius(self):
         r = 0
         for point in self._hitbox:
-            dist = (position, point)
+            dist = VMath.distance((0,0), point)
             if dist > r: r = dist
         self._radius = r
 
     def _get_area(self):
         h = (self._hitbox[0][1] - self._hitbox[1][1])
         w = (self._hitbox[1][0] - self._hitbox[2][0])
-        return w*h
+        return abs(w*h)
 
 
     # property

@@ -8,3 +8,8 @@ class Animation:
         self._translation = new_position
     def add_angle(self, new_angle):
         self._angle = new_angle
+    
+    def get_state(current_frame, max_frame, object_list):
+        obj = object_list[id]
+        obj.get_position()
+        if ()

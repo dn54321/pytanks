@@ -1,5 +1,5 @@
 # project libraries
-from lib import gameTile
+from src import gameTile
 
 class Wall(gameTile.GameTile):
     pass

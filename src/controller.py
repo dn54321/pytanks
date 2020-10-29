@@ -11,5 +11,8 @@ class Controller(abc.ABC):
         self._object_id = object_id
 
     @abc.abstractmethod
-    def update(self, gameGrid):
+    def update(self, grid):
         pass
+
+    # property
+    object_id = property(get_object_id, set_object_id)

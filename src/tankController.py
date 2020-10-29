@@ -1,9 +1,9 @@
 import abc
 from src import controller
 
-class tankController(controller.Controller):
+class TankController(controller.Controller):
     def __init__(self, object_id):
-        super.__init__(object_id)
+        super().__init__(object_id)
     
     @abc.abstractmethod
     def shoot(self, grid):
