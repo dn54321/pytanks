@@ -14,7 +14,7 @@ class TankController(controller.Controller):
         pass
 
     @abc.abstractmethod
-    def stop(self, grid):
+    def idle(self, grid):
         pass
 
     @abc.abstractmethod

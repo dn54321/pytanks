@@ -1,7 +1,7 @@
 from src import mapLoader, gameTile, gameGrid
 import pygame
 # Private Helper functions
-size = [1000, 1000]
+size = [500, 500]
 screen = pygame.display.set_mode(size)
 
 def _expand_one(bounds, width, height):
@@ -31,25 +31,27 @@ class Game:
 
     def start(self):
         clock = pygame.time.Clock()
-        
+        tick = 0
         while True:
+            tick += 1
+            if tick > 30: tick = 1
             clock.tick(30)
             pygame.event.pump()
             self.update_physics()
-            self.draw(clock)
+            self.draw(clock, tick)
 
-    def draw(self, clock):
+    def draw(self, clock, tick):
         screen.fill((255,255,255))
         for obj in self._grid.objects:
             pygame.draw.polygon(screen, (0,0,0), obj.get_hitbox(to_int=True))
-        screen.blit(self.update_fps(clock), (10,0))
+        self.draw_text(screen, str(int(clock.get_fps())), 10)
+        self.draw_text(screen, str(tick), 30)
         pygame.display.flip()
 
-    def update_fps(self, clock):
-        fps = str(int(clock.get_fps()))
+    def draw_text(self, screen, val, hor):
         font = pygame.font.Font(None, 20)
-        fps_text = font.render(fps, 1, pygame.Color("coral"))
-        return fps_text
+        text = font.render(val, 1, pygame.Color("coral"))
+        screen.blit(text, (hor,0))
 
     def load_map(self, url):
         grid = self._grid.map

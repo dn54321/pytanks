@@ -44,8 +44,10 @@ def get_distance(o1, o2, moving=constant.FORWARD):
     x,y = VMath.subtract(o1.position, o2.position)
 
     # Various angles
-    a1 = o1.angle + moving*math.pi      # Obj Velocity Direction
-    a2 = o2.angle               
+    a1 = o1.angle
+    a2 = o2.angle
+    a1_r = (a1 + math.pi) % math.tau    # Obj Velocity Direction
+    if moving: a1, a1_r = a1_r, a1             
 
     # Calculates and stores hitbox of objects for future use, saves recomputing.
     hitbox_obj1 = o1.hitbox   # So that code does not need to
@@ -59,15 +61,15 @@ def get_distance(o1, o2, moving=constant.FORWARD):
     # Rays from o1 -> o2
     for i in lines_o1:
         for j in lines_o2:
-            p = line_intersection(i, j, limit=[i[0],a1])
+            p = line_intersection(i, j, limit=[i[moving],a1])
             if p and _point_in_line(p, j):
                 distance = VMath.distance(p, i[moving])
                 if distance < min_dist: min_dist = distance
             
     # Rays from o2 -> o1
-    l_o2 = [h2[1], hitbox_obj2[(q+2)%4]]
     l_o1 = hitbox_obj1[0+2*moving:2+2*moving]
-    p = line_intersection(l_o2,l_o1, limit=[h2[1],a1])
+    l_o2 = [h2[1], hitbox_obj2[(q+3)%4]]
+    p = line_intersection(l_o2,l_o1, limit=[h2[1],a1_r])
     if p and _point_in_line(p, l_o1):
         distance = VMath.distance(p, h2[1])
         if distance < min_dist: min_dist = distance
@@ -92,12 +94,11 @@ def line_intersection(line1, line2, limit=None):
     x = det(d, xdiff) / div
     y = det(d, ydiff) / div
 
+    p, dir = limit
     if limit:
-        (x0,y0), dir = limit
-        if 0 <= dir <= math.pi and y < y0:
-            return False
-        elif math.pi/2 <= dir <= 3*math.pi/2 and x > x0:
-            return False 
+        if _line_at_angle((p,(x,y)), dir): return x, y
+        else: return False    
+        
     return x, y
 
 ### PRIVATE FUNCTIONS ###
@@ -120,8 +121,11 @@ def _point_in_object(point, obj):
 
 # Determines whether a point exist within a line
 def _point_in_line(point, line):
-	a,b,c = line[0],line[1],point
-	return VMath.distance(a,c) + VMath.distance(b,c) == VMath.distance(a,b)
+    (x0,y0),(x2,y2) = line
+    x1, y1 = point
+    if (x0<=x1<=x2 and y0<=y1<=y2) or (x2<=x1<=x0 and y2<=y1<=y0): 
+        return True
+    return False
 
 # Gets the edges of a square given it's points
 def _get_edges(points):
@@ -139,8 +143,11 @@ def _area_triangle(p1,p2,p3):
     
 def _line_at_angle(line, angle):
     p1,p2=line
-    x,y = VMath.subtract(p1,p2)
-    if VMath.atan2(y,x) is angle:
+    x,y = VMath.subtract(p2,p1)
+    l_angle = math.atan2(y,x)
+    if l_angle < 0: l_angle += math.tau
+    angle_diff = (angle - l_angle)
+    if abs(angle_diff) <= math.pi/2:
         return True
     return False
     
