@@ -13,7 +13,7 @@ class PlayerController(tankController.TankController):
         self._turn_angle = math.pi/45
     def forward(self, grid):
         tank = grid.get_object(self._object_id)
-        if tank.velocity < 8: tank.velocity += 1
+        if tank.velocity < 4: tank.velocity += 1
         grid.move_object(self.object_id, tank.velocity)
 
     def idle(self, grid):
@@ -23,7 +23,7 @@ class PlayerController(tankController.TankController):
     
     def reverse(self, grid):
         tank = grid.get_object(self._object_id)
-        if tank.velocity > 0: tank.velocity -= 4
+        if tank.velocity > 0: tank.velocity -= 2
         if tank.velocity <= 0: tank.velocity = -2
         grid.move_object(self.object_id, tank.velocity)
     

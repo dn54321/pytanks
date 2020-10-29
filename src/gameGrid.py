@@ -39,7 +39,7 @@ class GameGrid:
         if check_collision:
             dir = constant.FORWARD if dist>=0 else constant.REVERSE
             c_dist, c_obj = self._get_closest_object(obj, dir)
-            print(f"{c_dist} {obj.angle}, {obj.position}")
+            if __debug__: print(f"{c_dist} {obj.angle}, {obj.position}")
             if abs(dist) > c_dist:
                 if dist < 0: c_dist = -c_dist
                 action = obj.on_collide(c_obj)
