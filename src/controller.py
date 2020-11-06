@@ -10,6 +10,9 @@ class Controller(abc.ABC):
     def set_object_id(self, object_id):
         self._object_id = object_id
 
+    def delete(self):
+        return True
+
     @abc.abstractmethod
     def update(self, grid):
         pass

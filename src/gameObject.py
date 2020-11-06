@@ -42,7 +42,7 @@ class GameObject(abc.ABC):
         self._x, self._y = position
     
     def get_radius(self):
-        return self._hitbox
+        return self._radius
     
     def set_radius(self, radius):
         self._radius = radius
@@ -62,18 +62,20 @@ class GameObject(abc.ABC):
     def set_area(self, area):
         self._area = area
 
+    def delete(self):
+        return True
+        
     def _get_radius(self):
         r = 0
         for point in self._hitbox:
             dist = VMath.distance((0,0), point)
             if dist > r: r = dist
-        self._radius = r
+        return r
 
     def _get_area(self):
         h = (self._hitbox[0][1] - self._hitbox[1][1])
         w = (self._hitbox[1][0] - self._hitbox[2][0])
         return abs(w*h)
-
 
     # property
     hitbox = property(get_hitbox, set_hitbox)

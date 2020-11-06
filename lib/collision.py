@@ -39,6 +39,7 @@ def SAT(o1, o2, moving=None):
 def get_distance(o1, o2, moving=constant.FORWARD):
     min_dist = math.inf
     moving -= 1     # Forward: 0, Reverse: 1
+    c_line = None   
 
     # X and Y Distances
     x,y = VMath.subtract(o1.position, o2.position)
@@ -64,7 +65,9 @@ def get_distance(o1, o2, moving=constant.FORWARD):
             p = line_intersection(i, j, limit=[i[moving],a1])
             if p and _point_in_line(p, j):
                 distance = VMath.distance(p, i[moving])
-                if distance < min_dist: min_dist = distance
+                if distance < min_dist: 
+                    c_line = j
+                    min_dist = distance
             
     # Rays from o2 -> o1
     l_o1 = hitbox_obj1[0+2*moving:2+2*moving]
@@ -72,10 +75,11 @@ def get_distance(o1, o2, moving=constant.FORWARD):
     p = line_intersection(l_o2,l_o1, limit=[h2[1],a1_r])
     if p and _point_in_line(p, l_o1):
         distance = VMath.distance(p, h2[1])
-        if distance < min_dist: min_dist = distance
-    
+        if distance < min_dist: 
+            min_dist = distance
+            c_line = l_o2
     if min_dist is not math.inf: min_dist = int(min_dist)
-    return min_dist
+    return min_dist, c_line
 
 # Returns the point of intersection of two lines
 # credit: Paul Draper from stack Overflow
@@ -95,7 +99,7 @@ def line_intersection(line1, line2, limit=None):
     y = det(d, ydiff) / div
 
     p, dir = limit
-    if limit:
+    if limit and not VMath.equals(p, (x,y)):
         if _line_at_angle((p,(x,y)), dir): return x, y
         else: return False    
         
@@ -104,9 +108,9 @@ def line_intersection(line1, line2, limit=None):
 ### PRIVATE FUNCTIONS ###
 
 # Gets the collision of two objects by checking their radii.
-def circle(o1, o2):
-    dist = (o1, o2)
-    if o1.radius + o2.radius > dist:
+def circle(o1, o2, extra=0):
+    dist = VMath.distance(o1.position, o2.position)
+    if o1.radius + o2.radius + extra> dist:
         return True
     return False
 
@@ -121,13 +125,9 @@ def _point_in_object(point, obj):
 
 # Determines whether a point exist within a line
 def _point_in_line(point, line):
-    (x0,y0),(x2,y2) = line
-    x1, y1 = point
-    if x0>x2: x0,x2=x2,x0
-    if y0>y2: y0,y2=y2,y0
-    if (x0<=x1<=x2 and y0<=y1<=y2): 
-        return True
-    return False
+    b,(a,c) = point,line
+    return abs(VMath.distance(a,b) + VMath.distance(b,c) - VMath.distance(a,c))<=1
+
 
 # Gets the edges of a square given it's points
 def _get_edges(points):

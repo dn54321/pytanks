@@ -12,7 +12,13 @@ class Tank(gameObject.GameObject):
         self._velocity = 0
         self._acceleration = 1
         self._terminal_velocity = 5
+        self._muzzle_angle = angle
+        self._muzzle_length = self._radius*1.5
         self.rotate(angle)
+    
+    def rotate(self, angle):
+        super().rotate(angle)
+        self._muzzle_angle += angle
     
     def on_collide(self, o):
         if isinstance(o, gameTile.GameTile): return constant.REVERSE
@@ -23,11 +29,19 @@ class Tank(gameObject.GameObject):
         return self._velocity
     
     def set_velocity(self, velocity):
-        if velocity > self._terminal_velocity:
-           velocity = self._terminal_velocity 
         self._velocity = velocity
+
+    def get_muzzle_angle(self):
+        return self._muzzle_angle 
+
+    def set_muzzle_angle(self, angle):
+        self._muzzle_angle = angle
+
+    def get_muzzle_length(self):
+        return self._muzzle_length
 
     # Property Class
     velocity = property(get_velocity, set_velocity)
-    
+    muzzle_angle = property(get_muzzle_angle, set_muzzle_angle)
+    muzzle_length = property(get_muzzle_length)
     

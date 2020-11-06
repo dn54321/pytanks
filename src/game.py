@@ -1,4 +1,4 @@
-from src import mapLoader, gameTile, gameGrid
+from src import mapLoader, gameTile, gameGrid, constant
 import pygame
 # Private Helper functions
 size = [500, 500]
@@ -15,7 +15,7 @@ def _expand_one(bounds, width, height):
 
 class Game:
     def __init__(self):
-        self._grid = gameGrid.GameGrid()
+        self._grid = None
         self._players = []
         self._controllers = []
 
@@ -23,7 +23,7 @@ class Game:
         self._player.append(player)
 
     def update_physics(self):
-        for controller in self._controllers:
+        for controller in self._grid.controllers:
             controller.update(self._grid)
             
     def update_frames(self):
@@ -34,8 +34,8 @@ class Game:
         tick = 0
         while True:
             tick += 1
-            if tick > 30: tick = 1
-            clock.tick(30)
+            if tick > constant.TICKS: tick = 1
+            clock.tick(constant.TICKS)
             pygame.event.pump()
             self.update_physics()
             self.draw(clock, tick)
@@ -54,23 +54,17 @@ class Game:
         screen.blit(text, (hor,0))
 
     def load_map(self, url):
-        grid = self._grid.map
         stage = mapLoader.MapLoader()
         stage.load(url)
+        self._grid = gameGrid.GameGrid(stage.width, stage.height)
+        grid = self._grid.get_map()
         stage.build()
         obj = stage.objects
         controllers = 0
 
-        # Create empty grid map
-        for x in range(stage.width):
-            cell = []
-            for y in range(stage.height):
-                cell.append([])
-            grid.append(cell)
-
         # Fill in map
         for obj in stage.objects:
-            id = self._grid.add_object(obj)
+            id = self._grid.add_object(obj, check_collision=False)
             if isinstance(obj, gameTile.GameTile):
                 bounds = _expand_one(obj.tile_boundary, stage.width, stage.height)
                 (x0,y0),(x1,y1) = bounds
@@ -80,4 +74,4 @@ class Game:
             else:
                 controller = stage.controllers[controllers](id)
                 controllers += 1
-                self._controllers.append(controller)
+                self._grid.add_controller(controller)

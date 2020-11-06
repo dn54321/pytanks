@@ -36,6 +36,9 @@ def distance(p1, p2, p=2):
 def dot_product(p1,p2):
     return p1[0]*p2[0] + p1[1]*p2[1]
 
+def equals(p1, p2):
+    return p1[0] == p2[0] and p1[1] == p2[1]
+
 # Normalizes a point such that it's distance from the centre is 1.
 def normalize(point):
     x,y = point

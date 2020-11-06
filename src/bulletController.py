@@ -2,14 +2,17 @@ import abc
 from src import controller, gameGrid
 
 class BulletController(controller.Controller):
-    def __init__(self, object_id):
+    def __init__(self, object_id, controller):
         super().__init__(object_id)
+        self._controller = controller
         
-    @abc.abstractmethod
     def forward(self, grid):
-        obj = grid.objects[self.object_id]
-        grid.move_object(id, obj.velocity)
-    
-    @abc.abstractmethod
+        try: obj = grid.get_object(self.object_id)
+        except: return
+        else: grid.move_object(self._object_id, obj.velocity)
+
+    def delete(self):
+        self._controller.increment_ammo()
+
     def update(self, grid):
-        self.foward(grid)
+        self.forward(grid)

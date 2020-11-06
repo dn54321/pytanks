@@ -22,11 +22,11 @@ class TankController(controller.Controller):
         pass
 
     @abc.abstractmethod
-    def rotate_left(self, grid):
+    def rotate_tank(self, grid):
         pass
 
     @abc.abstractmethod
-    def rotate_right(self, grid):
+    def rotate_muzzle(self, grid):
         pass
 
     @abc.abstractmethod

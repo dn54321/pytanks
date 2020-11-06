@@ -15,7 +15,17 @@ class Settings:
                 self._config.read('settings.ini')
             except: 
                 self.generate_settings()
-            self._actions = ['accelerate', 'decelerate', 'turn_left', 'turn_right', 'shoot']
+            self._actions = {
+                'accelerate': 'w',
+                'decelerate': 's',
+                'turn_left': 'a',
+                'turn_right': 'd',
+                'nozzle_left': 'j',
+                'nozzle_right': 'i',
+                'shoot': 'space'
+            }
+            self._actions = ['accelerate', 'decelerate', 'turn_left', 'turn_right', 'shoot',
+                             'nozzle_left', 'nozzle_right']
         for key, value in self._config['key_bindings'].items():
             if value == 'space':
                 self._config['key_bindings'][key] = ' '
@@ -26,13 +36,7 @@ class Settings:
             'max_fps': '60',
             'resolution': '500x600'
         }
-        self._config['key_bindings']  = {
-            'turn_left': 'a',
-            'turn_right': 'd',
-            'accelerate': 'w',
-            'decelerate': 's',
-            'shoot': 'space'
-        }
+        self._config['key_bindings']  = self._actions
         with open('settings.ini', 'w') as config_file:
             self._config.write(config_file)
         self._config.read('settings.ini')

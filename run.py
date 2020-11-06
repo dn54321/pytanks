@@ -3,7 +3,9 @@ import pygame
 from time import sleep
 
 def main():
+    # Pygame window setup
     pygame.init()
+    pygame.display.set_caption('Pytanks')
     game_system = game.Game()
     game_system.load_map('default.json')
     game_system.start()
@@ -35,7 +37,7 @@ if __name__ == '__main__':
         ===============================
          =         Pytanks           =
         ===============================
-        
+
                [ O ]
                  \ \      
                   \ \  
