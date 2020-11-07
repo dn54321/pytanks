@@ -17,7 +17,7 @@ class PlayerController(tankController.TankController):
         self._is_space = False
         self._ammo = 3
         if __debug__: self._key = None
-        
+
     def forward(self, grid):
         tank = grid.get_object(self._object_id)
         if tank.velocity < 4: tank.velocity += 1
@@ -47,7 +47,7 @@ class PlayerController(tankController.TankController):
         x,y = VMath.translate(tank.position, tank.muzzle_length, tank.muzzle_angle)
         projectile = bullet.Bullet(x,y,tank.muzzle_angle)
         id = grid.add_object(projectile)
-        grid.add_controller(bulletController.BulletController(id, self))
+        if id: grid.add_controller(bulletController.BulletController(id, self))
 
     def increment_ammo(self):
         self._ammo += 1
@@ -55,10 +55,17 @@ class PlayerController(tankController.TankController):
     def update(self, grid):
         key = self._bit_key.get_keys()
         if __debug__:
-            if self._key is not key:
-                self._key = key
-                print(f"key press: {bin(key)}")
-
+            '''
+            if self._key is None:
+                self._key = 1
+                tank = grid.get_object(self._object_id)
+                tank._x, tank._y = 244.0690229049188, 88.01884026187207
+                tank.rotate(5.51524043630209)
+                self._keys = [1,1,1,1,1,1,9,9,9,9,9,9,9,9,1,1,1,1,1,5,5,5,5,5,5,1,9,9,9,9,9,9,9,1,5,5,5,5,5,5,1]
+                print(key, end=',')
+            if self._keys:
+                key = self._keys.pop(0)
+            '''
         vertical = constant.FORWARD | constant.REVERSE
         horizontal = constant.LEFT | constant.RIGHT
         nozzle_turn = constant.NOZZLE_LEFT | constant.NOZZLE_RIGHT
@@ -74,9 +81,9 @@ class PlayerController(tankController.TankController):
             else: self.reverse(grid)
         else: self.idle(grid)
         if key & constant.FIRE:
-            if self._ammo and not (self.is_space and self._timer): 
+            if self._ammo and not (self.is_space or self._timer): 
                 self.shoot(grid)
                 self.is_space = True
-                self._timer = constant.TICKS
+                self._timer = constant.TICKS/2
                 self._ammo -= 1
         else: self.is_space = False

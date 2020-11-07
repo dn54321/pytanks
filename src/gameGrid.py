@@ -7,7 +7,7 @@ from lib import collision, VMath, utils
 
 class GameGrid:
     def __init__(self, width, height):
-        self._object_counter = 0
+        self._object_counter = 1
         self._width = width
         self._height = height
         self._objects = {}
@@ -17,9 +17,9 @@ class GameGrid:
 
     # Adds an object to the grid.
     def add_object(self, obj, check_collision=True):
-        if check_collision and not (self._within_grid(obj) 
-            and self._check_collision(obj)):
-                return -1
+        if check_collision and (not self._within_grid(obj) 
+        or self._check_collision(obj)[0]):
+                return 0
         id = self._object_counter
         self._object_counter += 1
         self._objects[id] = obj
@@ -51,7 +51,7 @@ class GameGrid:
         obj = self._objects[id]
         if check_collision:
             c_dist, c_obj, c_line = self._get_closest_object(obj, dist)
-            if __debug__: print(f"{c_dist} {obj.angle}, {obj.position}")
+            #if __debug__: print(f"{c_dist} {obj.angle}, {obj.position}")
             if abs(dist) > c_dist:
                 if dist < 0: c_dist = -c_dist
                 self._handle_collision(obj, c_obj, moved=c_dist, line=c_line)

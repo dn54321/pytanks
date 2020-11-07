@@ -148,7 +148,8 @@ def _line_at_angle(line, angle):
     x,y = VMath.subtract(p2,p1)
     l_angle = math.atan2(y,x)
     if l_angle < 0: l_angle += math.tau
-    angle_diff = (angle - l_angle)
+    angle_diff = abs(angle - l_angle)
+    angle_diff = min(angle_diff, math.tau-angle_diff)
     if abs(angle_diff) <= math.pi/2:
         return True
     return False
