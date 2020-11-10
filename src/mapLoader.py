@@ -108,7 +108,7 @@ class MapLoader:
                     flower[i][j] = True
                     rval = random.randint(0,4)
                     surface.blit(tileset[rval][1], (i*gz, j*gz))
-        
+    '''    
     def _generate_walls(self, surface, tileset):
         stage = self._data['map']
         gz = constant.GRID_SIZE
@@ -141,6 +141,68 @@ class MapLoader:
                         elif is_wall and j+1<self.height:
                             rval = random.randint(0,2)
                             surface.blit(tileset[3+rval][2], (i*gz, (j+1)*gz))
+    '''
+    def _generate_walls(self, surface, tileset):
+        visited = utils.array_2d(self.width, self.height, False)
+        stage = self._data['map']
+        for i in range(self.width):
+            for j in range(self.height):
+                if stage[j][i] == 'w' and not visited[i][j]: 
+                    self._generate_wall(i, j,surface, tileset , visited, stage)
+
+    def _generate_wall(self, x, y, surface, tileset, visited, stage):
+        if not (0<=x<self.width and 0<=y<self.height) or visited[x][y]: return
+        if stage[y][x] != 'w': 
+            return self._generate_shadows(x, y, surface, tileset, visited)
+
+        gz = constant.GRID_SIZE
+        key, y_offset = 0, 0
+        if x-1 >= 0:
+            if stage[y][x-1] != 'w': key = key | constant.LEFT
+            elif y+1 < self.height and stage[y+1][x-1] != 'w' and stage[y+1][x] == 'w': 
+                key = key | constant.LEFT
+        if y-1 >= 0 and stage[y-1][x] != 'w': key = key | constant.UP
+        if x+1<self.width:
+            if stage[y][x+1] != 'w': key = key | constant.RIGHT
+            elif y+1 < self.height and stage[y+1][x+1] != 'w' and stage[y+1][x] == 'w': 
+                key = key | constant.RIGHT
+        if y+1 < self.height and stage[y+1][x] != 'w': y_offset = 4
+        elif y+2 < self.height and stage[y+2][x] != 'w': key = key | constant.DOWN
+        if key or y_offset:
+            i,j = MapLoader._direction[key]
+            i,j = i+7,j+1+y_offset
+            surface.blit(tileset[i][j], (x*gz,y*gz))
+        if y_offset: visited[x][y] = -1
+        else: visited[x][y] = 1
+        self._generate_wall(x+1, y, surface, tileset, visited, stage)
+        self._generate_wall(x, y+1, surface, tileset, visited, stage)
+
+    def _generate_shadows(self, x, y, surface, tileset, visited):
+        gz = constant.GRID_SIZE
+        if visited[x][y]: return
+        
+        if self._check(x-1, y, 'w'):
+            if self._check(x,y-1, 'w'): 
+                surface.blit(tileset[5][3], (x*gz,y*gz))
+            elif self._check(x-1,y+1,'a'):
+                surface.blit(tileset[3][4], (x*gz,y*gz)) 
+                surface.blit(tileset[5][1], (x*gz,(y+1)*gz))
+            elif self._check(x-1,y-2,'a') and self._check(x-1,y-1,'w'):
+                surface.blit(tileset[3][3], (x*gz,y*gz))
+            elif not self._check(x-1,y-1,'a'):
+                rval = random.randint(0,2)
+                surface.blit(tileset[3][3+rval], (x*gz,y*gz)) 
+        elif self._check(x,y-1, 'w'):
+            if self._check(x-1,y-1,'a'): surface.blit(tileset[4][3], (x*gz,y*gz))
+            else:
+                rval = random.randint(0,2)
+                surface.blit(tileset[3+rval][2], (x*gz, y*gz))
+        visited[x][y] = 1
+    def _check(self, x, y, symbol):
+        if 0 <= x < self.width and 0 <= y < self.height:
+            if self._data['map'][y][x] == symbol:
+                return True
+        return False
 
     def _build_controller(self, obj_type, x, y, angle):
         control_type = MapLoader._legend[obj_type]
