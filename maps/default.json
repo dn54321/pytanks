@@ -1,13 +1,28 @@
 {
     "name": "Default Map",  
-    "width": 9,
-    "height": 5,
+    "width": 20,
+    "height": 20,
     "map": [
-        "wwwwwwwww",
-        "waaawaaaw",
-        "wpaaaaaaw",
-        "wawaaaaaw",
-        "wwwwwwwww"
+        "wwwwwwwwwwwwwwwwwwww",
+        "wwwwwwwwwwwwwwwwwwww",
+        "wwwaaaawwwwwwwwwwwww",
+        "wwwapaaaaaaawwwwwwww",
+        "wwaaaaaaaaaaawwwwwww",
+        "wwaaaaaaaaaaaaaawwww",
+        "wwaaaaawwwaaaaaaawww",
+        "wwaaaaawwwwwaaaaawww",
+        "wwaaaaawwwwwaaaaawww",
+        "wwaaaaaaaawwaaaaawww",
+        "wwaaaaaaaaaaaaaaawww",
+        "wwaaaawwwwaaaaaaaaww",
+        "wwaaaawwwwaaaaaaaaww",
+        "wwaaaawwwwaaaaaaaaww",
+        "wwaaaawwwaaaaaaaaaww",
+        "wwaaaaaaaaaaaaaawwww",
+        "wwaaaaaaaaaaaaawwwww",
+        "wwwwwwaaaaaaaaawwwww",
+        "wwwwwwwwwwaaaawwwwww",
+        "wwwwwwwwwwwwwwwwwwww"
     ],
     "orientation": [90]
 }   

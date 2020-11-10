@@ -13,7 +13,7 @@ class GameGrid:
         self._objects = {}
         self._ids = {}
         self._controllers = {}
-        self._map = utils.array_2d(height, width)
+        self._map = utils.array_2d(width, height)
 
     # Adds an object to the grid.
     def add_object(self, obj, check_collision=True):

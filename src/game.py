@@ -1,7 +1,7 @@
 from src import mapLoader, gameTile, gameGrid, constant
 import pygame
 # Private Helper functions
-size = [500, 500]
+size = [800, 800]
 screen = pygame.display.set_mode(size)
 
 def _expand_one(bounds, width, height):
@@ -16,9 +16,10 @@ def _expand_one(bounds, width, height):
 class Game:
     def __init__(self):
         self._grid = None
+        self._bg = None
         self._players = []
         self._controllers = []
-
+        
     def add_player(self, player):
         self._player.append(player)
 
@@ -40,10 +41,18 @@ class Game:
             self.update_physics()
             self.draw(clock, tick)
 
-    def draw(self, clock, tick):
+    def draw_hitbox(self, clock, tick):
         screen.fill((255,255,255))
         for obj in self._grid.objects:
             pygame.draw.polygon(screen, (0,0,0), obj.get_hitbox(to_int=True))
+        self.draw_text(screen, str(int(clock.get_fps())), 10)
+        self.draw_text(screen, str(tick), 30)
+        pygame.display.flip()
+    
+    def draw(self, clock, tick):
+        screen.fill((255,255,255))
+        screen.blit(self._bg, (0,0))
+
         self.draw_text(screen, str(int(clock.get_fps())), 10)
         self.draw_text(screen, str(tick), 30)
         pygame.display.flip()
@@ -56,6 +65,7 @@ class Game:
     def load_map(self, url):
         stage = mapLoader.MapLoader()
         stage.load(url)
+        self._bg = stage.generate_surface()
         self._grid = gameGrid.GameGrid(stage.width, stage.height)
         grid = self._grid.get_map()
         stage.build()

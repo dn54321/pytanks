@@ -1,20 +1,32 @@
 # python libraries
-import json
-import math
+import json, math, pygame, random
 
 # project libraries
-from src import map, gameTile, playerController, gameObject
+from src import map, gameTile, playerController, gameObject, constant
+from lib import utils
 from src.gameObjects import *
 class MapLoader:
+    _legend = {
+        'w': wall.Wall,
+        'p': tank.Tank,
+        'a': None,
+        tank.Tank: playerController.PlayerController
+    }
+    _direction = {
+        0: (0,0),
+        constant.UP: (0,-1),
+        constant.DOWN: (0,1),
+        constant.LEFT: (-1,0),
+        constant.RIGHT: (1,0),
+        constant.LEFT|constant.UP: (-1,-1),
+        constant.RIGHT|constant.UP: (1,-1),
+        constant.LEFT|constant.DOWN: (-1,1),
+        constant.RIGHT|constant.DOWN: (1,1)
+    }
+
     def __init__(self):
         self._data = None
         self._map = None
-        self._legend = {
-            'w': wall.Wall,
-            'p': tank.Tank,
-            'a': None,
-            tank.Tank: playerController.PlayerController
-        }
 
     def load(self, url):
         with open('maps/' + url) as json_file:
@@ -34,7 +46,7 @@ class MapLoader:
         while y < self.height:
             x=0
             while x < self.width:
-                object_type = self._legend[stage[y][x]]
+                object_type = MapLoader._legend[stage[y][x]]
                 if not visited[y*self.width+x]:
                     if object_type is None:
                         x += 1
@@ -47,11 +59,91 @@ class MapLoader:
                 x += visited[y*self.width+x]
             y += 1
         
-    def generate_image(self):
-        pass
+    def generate_surface(self, seed=int(random.random()*999999999)):
+        random.seed(seed)
+        gz = constant.GRID_SIZE
+        stage = self._data['map']
+        surface = pygame.Surface((self.width*gz, self.height*gz))
+        tileset = self.get_tileset()
+        self._generate_background(surface, tileset)
+        self._generate_walls(surface, tileset)
+        return surface
+
+    def get_tileset(self):
+        image = pygame.image.load(constant.TILESET).convert_alpha()
+        image_width, image_height = image.get_size()
+        cols, rows = int(image_width/16), int(image_height/16)
+        tileset = utils.array_2d(rows, cols)
+        for x in range(cols):
+            for y in range(rows):
+                rect = pygame.Rect = (x*16, y*16, 16, 16)
+                tileset[x][y] = pygame.transform.scale2x(image.subsurface(rect))
+        return tileset
+
+    def _generate_background(self, surface, tileset):
+        gz = constant.GRID_SIZE
+        for i in range(self.width):
+            for j in range(self.height):
+                rval = random.randint(0,5)
+                surface.blit(tileset[rval][0], (i*gz, j*gz))
+        self._generate_flowers(surface, tileset)
+
+    def _generate_flowers(self, surface, tileset):
+        stage = self._data['map']
+        gz = constant.GRID_SIZE
+        flower = utils.array_2d(self.width, self.height, False)
+        for i in range(self.width):
+            for j in range(self.height):
+                grass_count = 0
+                flower_count = 0
+                for k in [-1,0,1]:
+                    for l in [-1,0,1]:
+                        x = i+k
+                        y = j+l
+                        if 0<=x<self.width and 0<=y<self.height:
+                            if stage[y][x] == 'a': grass_count += 1
+                            if flower[x][y]: flower_count += 1
+                threshhold = 1+grass_count*0.5 + flower_count*5
+                if random.randint(0,100) <= threshhold:
+                    flower[i][j] = True
+                    rval = random.randint(0,4)
+                    surface.blit(tileset[rval][1], (i*gz, j*gz))
+        
+    def _generate_walls(self, surface, tileset):
+        stage = self._data['map']
+        gz = constant.GRID_SIZE
+
+        for i in range(self.width):
+            for j in range(self.height):
+                if stage[j][i] == 'w':
+                    key = 0
+                    is_wall = 0
+                    if i-1>=0:
+                        if stage[j][i-1] != 'w': key = key | constant.LEFT
+                        elif j+1<self.height and stage[j+1][i] == 'w' and stage[j+1][i-1] != 'w': 
+                            key = key | constant.LEFT
+                    if i+1<self.width:
+                        if stage[j][i+1] != 'w': key = key | constant.RIGHT
+                        elif j+1<self.height and stage[j+1][i] == 'w' and stage[j+1][i+1] != 'w':
+                            key = key | constant.RIGHT
+                    if j-1>=0 and stage[j-1][i] != 'w': key = key | constant.UP
+                    if j+1<self.height and stage[j+1][i] != 'w': is_wall = 4
+                    elif j+2<self.height and stage[j+2][i] != 'w': key = key | constant.DOWN
+                    if key+is_wall: 
+                        x_offset, y_offset = MapLoader._direction[key]
+                        x_offset, y_offset = x_offset+7, y_offset+is_wall+1
+                        surface.blit(tileset[x_offset][y_offset], (i*gz, j*gz))
+                        if key & constant.RIGHT & constant.DOWN and j+1<self.height and i+1 <self.width:
+                            surface.blit(tileset[5][1], ((i+1)*gz, (j+1)*gz))
+                        elif key & constant.RIGHT and i+1<self.width:
+                            rval = random.randint(0,1)
+                            surface.blit(tileset[3][3+rval], ((i+1)*gz, j*gz))
+                        elif is_wall and j+1<self.height:
+                            rval = random.randint(0,2)
+                            surface.blit(tileset[3+rval][2], (i*gz, (j+1)*gz))
 
     def _build_controller(self, obj_type, x, y, angle):
-        control_type = self._legend[obj_type]
+        control_type = MapLoader._legend[obj_type]
         obj = obj_type(x, y, angle)
         self._map.objects.append(obj)
         self._map.controllers.append(control_type)
@@ -79,7 +171,7 @@ class MapLoader:
             visited[(y0+y)*self.width + x0] = w
 
         # Add Object
-        obj = self._legend[object_type](x0,y0, x0+w-1, y0+h-1)
+        obj = MapLoader._legend[object_type](x0,y0, x0+w-1, y0+h-1)
         self.objects.append(obj)
 
     # Proxy Functions

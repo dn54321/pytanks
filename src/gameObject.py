@@ -4,7 +4,7 @@ import abc
 # Project Library
 from lib import VMath
 
-class GameObject(abc.ABC):
+class GameObject:
     def __init__(self, x, y, hitbox, stationary=False):
         self._x = x
         self._y = y
@@ -23,6 +23,13 @@ class GameObject(abc.ABC):
 
     def move(self, distance):
         self.position = VMath.translate(self.position, distance, self._angle)
+
+    def render(self, x = None, y = None, angle = None):
+        if x is None:
+            x = self._x
+            y = self._y
+            angle = self._angle
+        pass
 
     def get_hitbox(self, to_int=False, get_raw=False):
         if get_raw: return self._hitbox
