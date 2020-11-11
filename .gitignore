@@ -1,3 +1,6 @@
 __pycache__
 .*
 !.gitignore
+assets/*
+!assets/tiles/sprites.png
+test.py

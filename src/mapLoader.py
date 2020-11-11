@@ -27,6 +27,7 @@ class MapLoader:
     def __init__(self):
         self._data = None
         self._map = None
+        self._sprites = self.get_tileset()
 
     def load(self, url):
         with open('maps/' + url) as json_file:
@@ -108,40 +109,7 @@ class MapLoader:
                     flower[i][j] = True
                     rval = random.randint(0,4)
                     surface.blit(tileset[rval][1], (i*gz, j*gz))
-    '''    
-    def _generate_walls(self, surface, tileset):
-        stage = self._data['map']
-        gz = constant.GRID_SIZE
 
-        for i in range(self.width):
-            for j in range(self.height):
-                if stage[j][i] == 'w':
-                    key = 0
-                    is_wall = 0
-                    if i-1>=0:
-                        if stage[j][i-1] != 'w': key = key | constant.LEFT
-                        elif j+1<self.height and stage[j+1][i] == 'w' and stage[j+1][i-1] != 'w': 
-                            key = key | constant.LEFT
-                    if i+1<self.width:
-                        if stage[j][i+1] != 'w': key = key | constant.RIGHT
-                        elif j+1<self.height and stage[j+1][i] == 'w' and stage[j+1][i+1] != 'w':
-                            key = key | constant.RIGHT
-                    if j-1>=0 and stage[j-1][i] != 'w': key = key | constant.UP
-                    if j+1<self.height and stage[j+1][i] != 'w': is_wall = 4
-                    elif j+2<self.height and stage[j+2][i] != 'w': key = key | constant.DOWN
-                    if key+is_wall: 
-                        x_offset, y_offset = MapLoader._direction[key]
-                        x_offset, y_offset = x_offset+7, y_offset+is_wall+1
-                        surface.blit(tileset[x_offset][y_offset], (i*gz, j*gz))
-                        if key & constant.RIGHT & constant.DOWN and j+1<self.height and i+1 <self.width:
-                            surface.blit(tileset[5][1], ((i+1)*gz, (j+1)*gz))
-                        elif key & constant.RIGHT and i+1<self.width:
-                            rval = random.randint(0,1)
-                            surface.blit(tileset[3][3+rval], ((i+1)*gz, j*gz))
-                        elif is_wall and j+1<self.height:
-                            rval = random.randint(0,2)
-                            surface.blit(tileset[3+rval][2], (i*gz, (j+1)*gz))
-    '''
     def _generate_walls(self, surface, tileset):
         visited = utils.array_2d(self.width, self.height, False)
         stage = self._data['map']
@@ -157,17 +125,13 @@ class MapLoader:
 
         gz = constant.GRID_SIZE
         key, y_offset = 0, 0
-        if x-1 >= 0:
-            if stage[y][x-1] != 'w': key = key | constant.LEFT
-            elif y+1 < self.height and stage[y+1][x-1] != 'w' and stage[y+1][x] == 'w': 
-                key = key | constant.LEFT
-        if y-1 >= 0 and stage[y-1][x] != 'w': key = key | constant.UP
-        if x+1<self.width:
-            if stage[y][x+1] != 'w': key = key | constant.RIGHT
-            elif y+1 < self.height and stage[y+1][x+1] != 'w' and stage[y+1][x] == 'w': 
-                key = key | constant.RIGHT
-        if y+1 < self.height and stage[y+1][x] != 'w': y_offset = 4
-        elif y+2 < self.height and stage[y+2][x] != 'w': key = key | constant.DOWN
+        if self._check(x-1, y, '!w'): key |= constant.LEFT
+        elif self._check(x-1,y+1,'!w') and self._check(x,y+1,'w'): key |= constant.LEFT
+        if self._check(x,y-1, '!w'): key |= constant.UP
+        if self._check(x+1,y,'!w'): key |= constant.RIGHT
+        elif self._check(x+1,y+1,'!w') and self._check(x,y+1,'w'): key |= constant.RIGHT
+        if self._check(x,y+1,'!w'): y_offset = 4
+        elif self._check(x,y+2,'!w'): key |= constant.DOWN
         if key or y_offset:
             i,j = MapLoader._direction[key]
             i,j = i+7,j+1+y_offset
@@ -184,12 +148,12 @@ class MapLoader:
         if self._check(x-1, y, 'w'):
             if self._check(x,y-1, 'w'): 
                 surface.blit(tileset[5][3], (x*gz,y*gz))
-            elif self._check(x-1,y+1,'a'):
+            elif self._check(x-1,y+1,'a'): 
                 surface.blit(tileset[3][4], (x*gz,y*gz)) 
                 surface.blit(tileset[5][1], (x*gz,(y+1)*gz))
             elif self._check(x-1,y-2,'a') and self._check(x-1,y-1,'w'):
                 surface.blit(tileset[3][3], (x*gz,y*gz))
-            elif not self._check(x-1,y-1,'a'):
+            elif self._check(x-1,y-1,'!a'):
                 rval = random.randint(0,2)
                 surface.blit(tileset[3][3+rval], (x*gz,y*gz)) 
         elif self._check(x,y-1, 'w'):
@@ -198,10 +162,11 @@ class MapLoader:
                 rval = random.randint(0,2)
                 surface.blit(tileset[3+rval][2], (x*gz, y*gz))
         visited[x][y] = 1
+        
     def _check(self, x, y, symbol):
         if 0 <= x < self.width and 0 <= y < self.height:
-            if self._data['map'][y][x] == symbol:
-                return True
+            if symbol[0] == '!': return self._data['map'][y][x] != symbol[1]
+            else: return self._data['map'][y][x] == symbol
         return False
 
     def _build_controller(self, obj_type, x, y, angle):
