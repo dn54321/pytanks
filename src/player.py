@@ -14,7 +14,15 @@ class Player:
     def get_tank_id(self):
         return self._tank_id
 
-    # Sets the controller (the method of which the tank is controlled)s
+    # Assigns the player the ID of the tank in the gameGrid which they can control.
+    def get_tank_colour(self):
+        return self._colour
+    
+    # Gets the colour scheme for the tank for this player.
+    def set_tank_colour(self, colour):
+        self._colour  = self.colour
+
+    # Sets the colour scheme of the tank for this player.
     def set_controller(self, controller):
         self._controller = controller
 
@@ -27,4 +35,5 @@ class Player:
 
     # Property Class | Setters | Getters
     tank_id = property(get_tank_id, assign_tank)
+    tank_colour = property(get_tank_colour, set_tank_colour)
     controller = property().setter(set_controller)

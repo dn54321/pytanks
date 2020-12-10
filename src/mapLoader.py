@@ -66,30 +66,11 @@ class MapLoader:
         stage = self._data['map']
         surface = pygame.Surface((self.width*gz, self.height*gz))
         tileset = self.get_tileset()
-        self._generate_background(surface, tileset)
-        self._generate_walls(surface, tileset)
+        self._render_background(surface, tileset)
+        self._render_walls(surface, tileset)
         return surface
 
-    def get_tileset(self):
-        image = pygame.image.load(constant.TILESET).convert_alpha()
-        image_width, image_height = image.get_size()
-        cols, rows = int(image_width/16), int(image_height/16)
-        tileset = utils.array_2d(rows, cols)
-        for x in range(cols):
-            for y in range(rows):
-                rect = pygame.Rect = (x*16, y*16, 16, 16)
-                tileset[x][y] = pygame.transform.scale2x(image.subsurface(rect))
-        return tileset
-
-    def _generate_background(self, surface, tileset):
-        gz = constant.GRID_SIZE
-        for i in range(self.width):
-            for j in range(self.height):
-                rval = random.randint(0,5)
-                surface.blit(tileset[rval][0], (i*gz, j*gz))
-        self._generate_flowers(surface, tileset)
-
-    def _generate_flowers(self, surface, tileset):
+    def _render_flowers(self, surface, tileset):
         stage = self._data['map']
         gz = constant.GRID_SIZE
         flower = utils.array_2d(self.width, self.height, False)
@@ -110,18 +91,18 @@ class MapLoader:
                     rval = random.randint(0,4)
                     surface.blit(tileset[rval][1], (i*gz, j*gz))
 
-    def _generate_walls(self, surface, tileset):
+    def _render_walls(self, surface, tileset):
         visited = utils.array_2d(self.width, self.height, False)
         stage = self._data['map']
         for i in range(self.width):
             for j in range(self.height):
                 if stage[j][i] == 'w' and not visited[i][j]: 
-                    self._generate_wall(i, j,surface, tileset , visited, stage)
+                    self._render_wall(i, j,surface, tileset , visited, stage)
 
-    def _generate_wall(self, x, y, surface, tileset, visited, stage):
+    def _render_wall(self, x, y, surface, tileset, visited, stage):
         if not (0<=x<self.width and 0<=y<self.height) or visited[x][y]: return
         if stage[y][x] != 'w': 
-            return self._generate_shadows(x, y, surface, tileset, visited)
+            return self._render_shadows(x, y, surface, tileset, visited)
 
         gz = constant.GRID_SIZE
         key, y_offset = 0, 0
@@ -138,10 +119,10 @@ class MapLoader:
             surface.blit(tileset[i][j], (x*gz,y*gz))
         if y_offset: visited[x][y] = -1
         else: visited[x][y] = 1
-        self._generate_wall(x+1, y, surface, tileset, visited, stage)
-        self._generate_wall(x, y+1, surface, tileset, visited, stage)
+        self._render_wall(x+1, y, surface, tileset, visited, stage)
+        self._render_wall(x, y+1, surface, tileset, visited, stage)
 
-    def _generate_shadows(self, x, y, surface, tileset, visited):
+    def _render_shadows(self, x, y, surface, tileset, visited):
         gz = constant.GRID_SIZE
         if visited[x][y]: return
         
@@ -162,7 +143,19 @@ class MapLoader:
                 rval = random.randint(0,2)
                 surface.blit(tileset[3+rval][2], (x*gz, y*gz))
         visited[x][y] = 1
+    
+    def _render_entities(self, tanks, bullets, gameGrid, surface, tileset):
+        gz = constant.GRID_SIZE
+        self._render_tanks(tanks, gameGrid, surface, tileset)
+       # self._render_bullets(bullet, gameGrid, surface, tileset)
+
+    def _render_bullets(self, tanks, gameGrid, surface, tileset):
+        gz = constant.GRID_SIZE
         
+    def _render_tanks(self, players, gameGrid, surface, tileset):
+        for player in players:
+            colour, tank_id = player.tank_colour, player.tank_id
+
     def _check(self, x, y, symbol):
         if 0 <= x < self.width and 0 <= y < self.height:
             if symbol[0] == '!': return self._data['map'][y][x] != symbol[1]
