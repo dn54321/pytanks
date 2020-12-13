@@ -65,7 +65,7 @@ class Game:
     def load_map(self, url):
         stage = mapLoader.MapLoader()
         stage.load(url)
-        self._bg = stage.generate_surface()
+        self._bg = stage.render_surface()
         self._grid = gameGrid.GameGrid(stage.width, stage.height)
         grid = self._grid.get_map()
         stage.build()

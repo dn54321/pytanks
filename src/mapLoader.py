@@ -2,7 +2,7 @@
 import json, math, pygame, random
 
 # project libraries
-from src import map, gameTile, playerController, gameObject, constant
+from src import map, gameTile, playerController, gameObject, constant, gameRender
 from lib import utils
 from src.gameObjects import *
 class MapLoader:
@@ -12,22 +12,12 @@ class MapLoader:
         'a': None,
         tank.Tank: playerController.PlayerController
     }
-    _direction = {
-        0: (0,0),
-        constant.UP: (0,-1),
-        constant.DOWN: (0,1),
-        constant.LEFT: (-1,0),
-        constant.RIGHT: (1,0),
-        constant.LEFT|constant.UP: (-1,-1),
-        constant.RIGHT|constant.UP: (1,-1),
-        constant.LEFT|constant.DOWN: (-1,1),
-        constant.RIGHT|constant.DOWN: (1,1)
-    }
+
 
     def __init__(self):
         self._data = None
         self._map = None
-        self._sprites = self.get_tileset()
+        self._renderer = None
 
     def load(self, url):
         with open('maps/' + url) as json_file:
@@ -37,13 +27,14 @@ class MapLoader:
         width = self._data['width']
         height = self._data['height']
         self._map = map.Map(name, width, height)
+        sz = (width*constant.GRID_SIZE, height*constant.GRID_SIZE)
+        self._renderer = gameRender.GameRender(pygame.Surface(sz), width, height)
         
     def build(self):
+        counter, y = 0, 0
         stage = self._data['map']
         orientation = self._data['orientation']
-        counter = 0
         visited = [0]*self.height*self.width
-        y=0
         while y < self.height:
             x=0
             while x < self.width:
@@ -60,15 +51,14 @@ class MapLoader:
                 x += visited[y*self.width+x]
             y += 1
         
-    def generate_surface(self, seed=int(random.random()*999999999)):
+    def render_surface(self, seed=int(random.random()*999999999)):
         random.seed(seed)
-        gz = constant.GRID_SIZE
-        stage = self._data['map']
-        surface = pygame.Surface((self.width*gz, self.height*gz))
-        tileset = self.get_tileset()
-        self._render_background(surface, tileset)
-        self._render_walls(surface, tileset)
-        return surface
+        dims = w,h = self.width, self.height
+        arr = utils.matrix_transpose(self._data['map'], (h,w))
+        self._renderer.render_background()
+        self._renderer.render_flowers(utils.msk_2d(arr, 'a', dims))
+        self._renderer.render_walls(utils.msk_2d(arr, 'w', dims))
+        return self._renderer.surface
 
     def _render_flowers(self, surface, tileset):
         stage = self._data['map']
