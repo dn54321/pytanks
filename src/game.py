@@ -1,4 +1,4 @@
-from src import mapLoader, gameTile, gameGrid, constant
+from src import mapLoader, gameTile, gameGrid, constant, tankController
 import pygame
 # Private Helper functions
 size = [800, 800]
@@ -18,7 +18,6 @@ class Game:
         self._grid = None
         self._bg = None
         self._players = []
-        self._controllers = []
         
     def add_player(self, player):
         self._player.append(player)
@@ -51,8 +50,9 @@ class Game:
     
     def draw(self, clock, tick):
         screen.fill((255,255,255))
+        surface = self.render_frame()
         screen.blit(self._bg, (0,0))
-
+        
         self.draw_text(screen, str(int(clock.get_fps())), 10)
         self.draw_text(screen, str(tick), 30)
         pygame.display.flip()
@@ -65,10 +65,12 @@ class Game:
     def load_map(self, url):
         stage = mapLoader.MapLoader()
         stage.load(url)
+        stage.build()
         self._bg = stage.render_surface()
         self._grid = gameGrid.GameGrid(stage.width, stage.height)
+        self._renderer = stage.get_renderer()
         grid = self._grid.get_map()
-        stage.build()
+        
         obj = stage.objects
         controllers = 0
 
@@ -85,3 +87,15 @@ class Game:
                 controller = stage.controllers[controllers](id)
                 controllers += 1
                 self._grid.add_controller(controller)
+
+    def render_frame():
+        controllers = self._grid.get_controllers
+        for i in range(len(controllers)):
+            controller = controllers[i]
+            if isinstance(controller, gameObjects.tank):
+                player = self._players[i]
+                colour = player.tank_colour
+                tank = self._grid.get_object(controller.object_id)
+                self._renderer.render_tank()
+            else:
+                print(":D")

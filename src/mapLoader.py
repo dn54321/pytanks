@@ -51,6 +51,9 @@ class MapLoader:
                 x += visited[y*self.width+x]
             y += 1
         
+    def get_renderer():
+        return self._renderer
+
     def render_surface(self, seed=int(random.random()*999999999)):
         random.seed(seed)
         dims = w,h = self.width, self.height

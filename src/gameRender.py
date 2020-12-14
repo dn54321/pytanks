@@ -57,10 +57,13 @@ class GameRender:
         i,j = obj
         self._surface.blit(self._sprite_sheet[i][j], (x,y))
         
-    def render_entity(self, colour, rotation, pivot=[0,0]):
-        pass
-    def get_tank_sprite(self, colour, rotation):
-        pass
+    def render_entity(self, entity, rotation, colour, pivot=[0,0]):
+        if x is None:
+
+    def render_tank(surface, x, y, rotation, colour=pygame.BLACK):
+        entity = (0,0)
+        render_entity(entity, rotation, colour)
+
     def get_bullet_sprite(self):
         pass
 
