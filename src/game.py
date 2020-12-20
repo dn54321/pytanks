@@ -1,9 +1,9 @@
 from src import mapLoader, gameTile, gameGrid, constant, tankController
+from src.gameObjects import tank
 import pygame
 # Private Helper functions
 size = [800, 800]
 screen = pygame.display.set_mode(size)
-
 def _expand_one(bounds, width, height):
     x0,y0 = bounds[0]
     x1,y1 = bounds[1]
@@ -16,7 +16,7 @@ def _expand_one(bounds, width, height):
 class Game:
     def __init__(self):
         self._grid = None
-        self._bg = None
+        self._bg = pygame.display.set_mode(size)
         self._players = []
         
     def add_player(self, player):
@@ -30,37 +30,37 @@ class Game:
         pass
 
     def start(self):
-        clock = pygame.time.Clock()
         tick = 0
         while True:
             tick += 1
             if tick > constant.TICKS: tick = 1
-            clock.tick(constant.TICKS)
             pygame.event.pump()
             self.update_physics()
-            self.draw(clock, tick)
+            self.draw(tick)
 
-    def draw_hitbox(self, clock, tick):
-        screen.fill((255,255,255))
+    def draw_hitbox(self, tick):
+        clock = pygame.time.Clock()
+        clock.tick(constant.TICKS)
+        screen = pygame.display.set_mode(size).fill((255,255,255))
         for obj in self._grid.objects:
             pygame.draw.polygon(screen, (0,0,0), obj.get_hitbox(to_int=True))
         self.draw_text(screen, str(int(clock.get_fps())), 10)
         self.draw_text(screen, str(tick), 30)
         pygame.display.flip()
     
-    def draw(self, clock, tick):
-        screen.fill((255,255,255))
+    def draw(self, tick):
         surface = self.render_frame()
-        screen.blit(self._bg, (0,0))
-        
-        self.draw_text(screen, str(int(clock.get_fps())), 10)
-        self.draw_text(screen, str(tick), 30)
+        clock = pygame.time.Clock()
+        clock.tick(constant.TICKS)
+        self.draw_text(surface, str(int(clock.get_fps())), 10)
+        self.draw_text(surface, str(tick), 30)
+        screen.blit(surface, (0,0))
         pygame.display.flip()
 
-    def draw_text(self, screen, val, hor):
+    def draw_text(self, surface, val, hor):
         font = pygame.font.Font(None, 20)
         text = font.render(val, 1, pygame.Color("coral"))
-        screen.blit(text, (hor,0))
+        surface.blit(text, (hor,0))
 
     def load_map(self, url):
         stage = mapLoader.MapLoader()
@@ -88,14 +88,16 @@ class Game:
                 controllers += 1
                 self._grid.add_controller(controller)
 
-    def render_frame():
-        controllers = self._grid.get_controllers
+    def render_frame(self):
+        surface = self._bg.copy().convert_alpha()
+        controllers = self._grid.get_controllers()
         for i in range(len(controllers)):
             controller = controllers[i]
-            if isinstance(controller, gameObjects.tank):
-                player = self._players[i]
-                colour = player.tank_colour
-                tank = self._grid.get_object(controller.object_id)
-                self._renderer.render_tank()
-            else:
-                print(":D")
+            obj = self._grid.get_object(controller.object_id)
+            if isinstance(obj, tank.Tank):
+                colour = self._players[i].tank_colour
+                self._renderer.render_tank(surface, obj, colour)
+            #else:
+            #
+            #    self._renderer.render_bullet(surface, obj, pygame.BLACK)
+        return surface

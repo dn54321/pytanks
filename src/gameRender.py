@@ -2,7 +2,7 @@ from random import randint, shuffle
 
 import pygame
 
-from lib import utils
+from lib import utils, VMath
 from src import constant
 
 
@@ -57,12 +57,18 @@ class GameRender:
         i,j = obj
         self._surface.blit(self._sprite_sheet[i][j], (x,y))
         
-    def render_entity(self, entity, rotation, colour, pivot=[0,0]):
-        if x is None:
+    def render_entity(self, surface, sprite, entity, colour=None, pivot=[0,0]):
+        i,j = sprite
+        tile = self._spite_sheet[i][j].copy().convert_alpha()
+        rot_tile = pygame.transform.rotate(tile, entity.angle)
+        center = rot_tile.get_width()/2, rot_tile.get_height()/2
+        pos = VMath.subtract(entity.position, center)
+        surface.blit(rot_tile, pos)
+        
 
-    def render_tank(surface, x, y, rotation, colour=pygame.BLACK):
-        entity = (0,0)
-        render_entity(entity, rotation, colour)
+    def render_tank(self, surface, tank, colour=None):
+        sprite = (0,0)
+        self.render_entity(surface, sprite, tank, colour)
 
     def get_bullet_sprite(self):
         pass
