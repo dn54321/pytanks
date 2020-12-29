@@ -20,7 +20,7 @@ class Game:
         self._players = []
         
     def add_player(self, player):
-        self._player.append(player)
+        self._players.append(player)
 
     def update_physics(self):
         for controller in self._grid.controllers:
@@ -87,6 +87,16 @@ class Game:
                 controller = stage.controllers[controllers](id)
                 controllers += 1
                 self._grid.add_controller(controller)
+
+    def assign_tanks(self):
+        player_sz = len(self._players)
+        controllers = self._grid.get_controllers()
+        offset = len(controllers) - player_sz + 1
+        i = 0
+        for player in self._players:
+            id = controllers[i].get_object_id()
+            player.assign_tank(id)
+            i += offset
 
     def render_frame(self):
         surface = self._bg.copy().convert_alpha()
