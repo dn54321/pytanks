@@ -31,15 +31,15 @@ class Game:
 
     def start(self):
         tick = 0
+        clock = pygame.time.Clock()
         while True:
             tick += 1
             if tick > constant.TICKS: tick = 1
             pygame.event.pump()
             self.update_physics()
-            self.draw(tick)
+            self.draw(tick, clock)
 
-    def draw_hitbox(self, tick):
-        clock = pygame.time.Clock()
+    def draw_hitbox(self, tick, clock):
         clock.tick(constant.TICKS)
         screen = pygame.display.set_mode(size).fill((255,255,255))
         for obj in self._grid.objects:
@@ -48,9 +48,8 @@ class Game:
         self.draw_text(screen, str(tick), 30)
         pygame.display.flip()
     
-    def draw(self, tick):
-        surface = self.render_frame()
-        clock = pygame.time.Clock()
+    def draw(self, tick, clock):
+        surface = self.render_entities()
         clock.tick(constant.TICKS)
         self.draw_text(surface, str(int(clock.get_fps())), 10)
         self.draw_text(surface, str(tick), 30)
@@ -88,7 +87,7 @@ class Game:
                 controllers += 1
                 self._grid.add_controller(controller)
 
-    def render_frame(self):
+    def render_entities(self, tick):
         surface = self._bg.copy().convert_alpha()
         controllers = self._grid.get_controllers()
         for i in range(len(controllers)):
@@ -96,7 +95,8 @@ class Game:
             obj = self._grid.get_object(controller.object_id)
             if isinstance(obj, tank.Tank):
                 colour = self._players[i].tank_colour
-                self._renderer.render_tank(surface, obj, colour)
+                self._renderer.render_tank(surface, obj, 
+                colour=colour, frame=tick%2)
             #else:
             #
             #    self._renderer.render_bullet(surface, obj, pygame.BLACK)
