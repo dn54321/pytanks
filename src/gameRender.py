@@ -4,7 +4,7 @@ import pygame
 
 from lib import utils, VMath
 from src import constant
-
+import math
 
 class GameRender:
     _direction = {
@@ -47,7 +47,8 @@ class GameRender:
         for x in range(cols):
             for y in range(rows):
                 rect = pygame.Rect = (x*16, y*16, 16, 16)
-                if y: tileset[x][y] = pygame.transform.scale2x(image.subsurface(rect))
+                tileset[x][y] = pygame.transform.scale2x(image.subsurface(rect))
+                #else: tileset[x][y] = image.subsurface(rect)
         return tileset
     
     def render_tile(self, obj, x=None, y=None):
@@ -57,21 +58,24 @@ class GameRender:
         i,j = obj
         self._surface.blit(self._sprite_sheet[i][j], (x,y))
         
-    def render_entity(self, surface, sprite, entity, colour=None, pivot=[0,0]):
+    def render_entity(self, surface, sprite, entity, colour=None, angle=None, pivot=[0,0]):
         i,j = sprite
-        tile = self._spite_sheet[i][j].copy().convert_alpha()
-        rot_tile = pygame.transform.rotate(tile, entity.angle)
+        tile = self._sprite_sheet[i][j].copy().convert_alpha()
+        if not angle: angle = entity.angle 
+        rot_tile = pygame.transform.rotate(tile, -math.degrees(angle))
         center = rot_tile.get_width()/2, rot_tile.get_height()/2
         pos = VMath.subtract(entity.position, center)
+
+        # Account for pivot
+        pos = VMath.subtract(pos, VMath.rotate([pivot], angle)[0])
         surface.blit(rot_tile, pos)
-        
 
     def render_tank(self, surface, tank, colour=None):
-        sprite = (0,0)
-        self.render_entity(surface, sprite, tank, colour)
+        self.render_entity(surface, (tank.frame,0), tank, colour=colour)
+        self.render_entity(surface, (4,0), tank, colour=colour, angle=tank.nozzle_angle, pivot=(-8,0))
 
-    def get_bullet_sprite(self):
-        pass
+    def render_bullet(self, surface, bullet, colour=None):
+        self.render_entity(surface, (5,0), bullet, colour=colour)
 
     # Finds the correct tile wall sprite and returns the 2d index of it.
     def _get_wall_sprite(self):

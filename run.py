@@ -1,4 +1,4 @@
-from src import game
+from src import game, player
 import pygame
 from time import sleep
 
@@ -7,7 +7,10 @@ def main():
     pygame.init()
     pygame.display.set_caption('Pytanks')
     game_system = game.Game()
+    default_player = player.Player("Player 1")
+    game_system.add_player(default_player)
     game_system.load_map('default.json')
+    game_system.assign_tanks()
     game_system.start()
 
 

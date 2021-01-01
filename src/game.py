@@ -20,7 +20,7 @@ class Game:
         self._players = []
         
     def add_player(self, player):
-        self._player.append(player)
+        self._players.append(player)
 
     def update_physics(self):
         for controller in self._grid.controllers:
@@ -49,7 +49,7 @@ class Game:
         pygame.display.flip()
     
     def draw(self, tick, clock):
-        surface = self.render_entities()
+        surface = self.render_entities(tick)
         clock.tick(constant.TICKS)
         self.draw_text(surface, str(int(clock.get_fps())), 10)
         self.draw_text(surface, str(tick), 30)
@@ -87,6 +87,16 @@ class Game:
                 controllers += 1
                 self._grid.add_controller(controller)
 
+    def assign_tanks(self):
+        player_sz = len(self._players)
+        controllers = self._grid.get_controllers()
+        offset = len(controllers) - player_sz + 1
+        i = 0
+        for player in self._players:
+            id = controllers[i].get_object_id()
+            player.assign_tank(id)
+            i += offset
+
     def render_entities(self, tick):
         surface = self._bg.copy().convert_alpha()
         controllers = self._grid.get_controllers()
@@ -95,9 +105,7 @@ class Game:
             obj = self._grid.get_object(controller.object_id)
             if isinstance(obj, tank.Tank):
                 colour = self._players[i].tank_colour
-                self._renderer.render_tank(surface, obj, 
-                colour=colour, frame=tick%2)
-            #else:
-            #
-            #    self._renderer.render_bullet(surface, obj, pygame.BLACK)
+                self._renderer.render_tank(surface, obj, colour=colour)
+            else:
+                self._renderer.render_bullet(surface, obj, colour=None)
         return surface

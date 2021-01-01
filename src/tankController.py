@@ -26,7 +26,7 @@ class TankController(controller.Controller):
         pass
 
     @abc.abstractmethod
-    def rotate_muzzle(self, grid):
+    def rotate_nozzle(self, grid):
         pass
 
     @abc.abstractmethod
