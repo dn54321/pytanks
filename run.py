@@ -8,6 +8,7 @@ def main():
     pygame.display.set_caption('Pytanks')
     game_system = game.Game()
     default_player = player.Player("Player 1")
+    default_player.set_colour((65,105,225))
     game_system.add_player(default_player)
     game_system.load_map('default.json')
     game_system.assign_tanks()

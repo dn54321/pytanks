@@ -104,7 +104,7 @@ class Game:
             controller = controllers[i]
             obj = self._grid.get_object(controller.object_id)
             if isinstance(obj, tank.Tank):
-                colour = self._players[i].tank_colour
+                colour = self._players[i].colour
                 self._renderer.render_tank(surface, obj, colour=colour)
             else:
                 self._renderer.render_bullet(surface, obj, colour=None)

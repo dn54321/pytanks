@@ -26,6 +26,7 @@ class GameRender:
         self._width = width
         self._height = height
         self._cursor_pos = (0,0)
+        self._tank_colours = {}
 
     # Changes the pygame surface to render objects on
     def set_surface(self, surface):
@@ -58,9 +59,11 @@ class GameRender:
         i,j = obj
         self._surface.blit(self._sprite_sheet[i][j], (x,y))
         
-    def render_entity(self, surface, sprite, entity, colour=None, angle=None, pivot=[0,0]):
-        i,j = sprite
-        tile = self._sprite_sheet[i][j].copy().convert_alpha()
+    def render_entity(self, surface, sprite, entity, angle=None, pivot=[0,0]):
+        if isinstance(sprite, pygame.Surface): tile = sprite
+        else:
+            i,j = sprite 
+            tile = self._sprite_sheet[i][j].copy().convert_alpha()
         if not angle: angle = entity.angle 
         rot_tile = pygame.transform.rotate(tile, -math.degrees(angle))
         center = rot_tile.get_width()/2, rot_tile.get_height()/2
@@ -71,11 +74,13 @@ class GameRender:
         surface.blit(rot_tile, pos)
 
     def render_tank(self, surface, tank, colour=None):
-        self.render_entity(surface, (tank.frame,0), tank, colour=colour)
-        self.render_entity(surface, (4,0), tank, colour=colour, angle=tank.nozzle_angle, pivot=(-8,0))
+        tank_body = self.get_tank_sprite(colour, tank.frame)
+        tank_nozzle = self.get_tank_sprite(colour, 4)
+        self.render_entity(surface, tank_body, tank)
+        self.render_entity(surface, tank_nozzle, tank, angle=tank.nozzle_angle, pivot=(-8,0))
 
     def render_bullet(self, surface, bullet, colour=None):
-        self.render_entity(surface, (5,0), bullet, colour=colour)
+        self.render_entity(surface, (5,0), bullet)
 
     # Finds the correct tile wall sprite and returns the 2d index of it.
     def _get_wall_sprite(self):
@@ -148,6 +153,28 @@ class GameRender:
         if 0 <= x < self._width and 0 <= y < self._height:
             return bitmap[x][y] == bit
         return False
+
+    def get_tank_sprite(self, colour, frame):
+        r0,g0,b0=colour
+        if colour in self._tank_colours:
+            return self._tank_colours[colour][frame]
+        sprites = []
+        for i in range(6):
+            sprite = self._sprite_sheet[i][0].copy().convert_alpha()
+            w, h = sprite.get_size()
+            for x in range(w):
+                for y in range(h):
+                    r1,g1,b1,a = sprite.get_at((x,y))
+                    if not a: continue
+                    brightness = (0.21*r1+0.72*g1+0.07*b1)/255
+                    r1 = r0*brightness
+                    g1 = g1*brightness
+                    b1 = b1*brightness
+                    sprite.set_at((x,y),(r1,g1,b1,a))
+            sprites.append(sprite)
+
+        self._tank_colours[colour] = sprites
+        return self._tank_colours[colour][frame]
 
     # property
     surface = property(get_surface, set_surface)
