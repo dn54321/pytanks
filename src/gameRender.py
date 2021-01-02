@@ -59,7 +59,7 @@ class GameRender:
         i,j = obj
         self._surface.blit(self._sprite_sheet[i][j], (x,y))
         
-    def render_entity(self, surface, sprite, entity, angle=None, pivot=[0,0]):
+    def render_entity(self, surface, sprite, entity, time_step, angle=None, pivot=[0,0]):
         if isinstance(sprite, pygame.Surface): tile = sprite
         else:
             i,j = sprite 
@@ -67,20 +67,23 @@ class GameRender:
         if not angle: angle = entity.angle 
         rot_tile = pygame.transform.rotate(tile, -math.degrees(angle))
         center = rot_tile.get_width()/2, rot_tile.get_height()/2
-        pos = VMath.subtract(entity.position, center)
+        x1, y1 = entity.position
+        x0, y0 = entity.old_position
+        entity_pos = x0+(x1-x0)*time_step, y0+(y1-y0)*time_step
+        pos = VMath.subtract(entity_pos, center)
 
         # Account for pivot
         pos = VMath.subtract(pos, VMath.rotate([pivot], angle)[0])
         surface.blit(rot_tile, pos)
 
-    def render_tank(self, surface, tank, colour=None):
+    def render_tank(self, surface, tank, time_step, colour=None):
         tank_body = self.get_tank_sprite(colour, tank.frame)
         tank_nozzle = self.get_tank_sprite(colour, 4)
-        self.render_entity(surface, tank_body, tank)
-        self.render_entity(surface, tank_nozzle, tank, angle=tank.nozzle_angle, pivot=(-8,0))
+        self.render_entity(surface, tank_body, tank, time_step)
+        self.render_entity(surface, tank_nozzle, tank, time_step, angle=tank.nozzle_angle, pivot=(-8,0))
 
-    def render_bullet(self, surface, bullet, colour=None):
-        self.render_entity(surface, (5,0), bullet)
+    def render_bullet(self, surface, bullet, time_step, colour=None):
+        self.render_entity(surface, (5,0), bullet, time_step)
 
     # Finds the correct tile wall sprite and returns the 2d index of it.
     def _get_wall_sprite(self):

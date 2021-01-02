@@ -6,13 +6,15 @@ from lib import VMath
 
 class GameObject:
     def __init__(self, x, y, hitbox, stationary=False):
-        self._x = x
-        self._y = y
+        self._position = x, y
         self._hitbox = hitbox
         self._area = self._get_area()
         self._radius = self._get_radius()
         self._stationary = stationary
         self._angle = 0
+
+        if not stationary:
+            self._old_position = x,y
 
     def on_collide(self, o):
         pass
@@ -22,31 +24,29 @@ class GameObject:
         self._angle = (math.tau + self._angle + angle) % math.tau
 
     def move(self, distance):
+        self._old_position = self._position
         self.position = VMath.translate(self.position, distance, self._angle)
-
-    def render(self, x = None, y = None, angle = None):
-        if x is None:
-            x = self._x
-            y = self._y
-            angle = self._angle
-        pass
 
     def get_hitbox(self, to_int=False, get_raw=False):
         if get_raw: return self._hitbox
+        x0,y0 = self._position
         if to_int:
-            hitbox = [(int(round(x+self._x)),int(round(y+self._y))) for x,y in self._hitbox]
+            hitbox = [(int(round(x+x0)),int(round(y+y0))) for x,y in self._hitbox]
         else:
-            hitbox = [(x+self._x,y+self._y) for x,y in self._hitbox]
+            hitbox = [(x+x0,y+y0) for x,y in self._hitbox]
         return hitbox
     
     def set_hitbox(self, hitbox):
         self._hitbox = hitbox
 
+    def get_old_position(self):
+        return self._old_position
+
     def get_position(self):
-        return self._x,self._y
+        return self._position
     
     def set_position(self, position):
-        self._x, self._y = position
+        self._position = position
     
     def get_radius(self):
         return self._radius
@@ -87,6 +87,7 @@ class GameObject:
     # property
     hitbox = property(get_hitbox, set_hitbox)
     position = property(get_position, set_position)
+    old_position = property(get_old_position)
     radius = property(get_radius, set_radius)
     angle = property(get_angle, set_angle)
     area = property(get_area, set_area)
