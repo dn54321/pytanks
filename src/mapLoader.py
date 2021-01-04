@@ -2,15 +2,21 @@
 import json, math, pygame, random
 
 # project libraries
-from src import map, gameTile, playerController, gameObject, constant, gameRender
+from src import map, gameTile, playerController, sentryController, gameObject, constant, gameRender
 from lib import utils
 from src.gameObjects import *
 class MapLoader:
     _legend = {
         'w': wall.Wall,
         'p': tank.Tank,
+        's': tank.Tank,
         'a': None,
         tank.Tank: playerController.PlayerController
+    }
+
+    _tanks = {
+        'p': playerController.PlayerController,
+        's': sentryController.SentryController
     }
 
 
@@ -22,7 +28,7 @@ class MapLoader:
     def load(self, url):
         with open('maps/' + url) as json_file:
             self._data = json.load(json_file)
-        self._data['orientation'] = [math.radians(90-x) for x in self._data['orientation']]
+        self._data['orientation'] = [(math.tau+math.radians(90-x))%math.tau for x in self._data['orientation']]
         name = self._data['name']
         width = self._data['width']
         height = self._data['height']
@@ -30,7 +36,7 @@ class MapLoader:
         sz = (width*constant.GRID_SIZE, height*constant.GRID_SIZE)
         self._renderer = gameRender.GameRender(pygame.Surface(sz), width, height)
         
-    def build(self):
+    def build(self, player_amount):
         counter, y = 0, 0
         stage = self._data['map']
         orientation = self._data['orientation']
@@ -45,8 +51,9 @@ class MapLoader:
                     elif issubclass(object_type, gameTile.GameTile):
                         self._build_tile(visited, stage, x, y)
                     elif issubclass(object_type, gameObject.GameObject):
-                        self._build_controller(object_type, x, y, orientation[counter])
-                        counter += 1
+                        if counter < player_amount:
+                            self._build_controller(stage[y][x], x, y, orientation[counter])
+                            counter += 1
                         x += 1
                 x += visited[y*self.width+x]
             y += 1
@@ -156,8 +163,9 @@ class MapLoader:
         return False
 
     def _build_controller(self, obj_type, x, y, angle):
-        control_type = MapLoader._legend[obj_type]
-        obj = obj_type(x, y, angle)
+        control_type = MapLoader._tanks[obj_type]
+        entity_type = MapLoader._legend[obj_type]
+        obj = entity_type(x, y, angle)
         self._map.objects.append(obj)
         self._map.controllers.append(control_type)
 

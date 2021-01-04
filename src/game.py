@@ -5,6 +5,7 @@ import pygame
 # Private Helper functions
 size = [800, 800]
 screen = pygame.display.set_mode(size)
+temp = []
 def _expand_one(bounds, width, height):
     x0,y0 = bounds[0]
     x1,y1 = bounds[1]
@@ -83,7 +84,7 @@ class Game:
     def load_map(self, url):
         stage = mapLoader.MapLoader()
         stage.load(url)
-        stage.build()
+        stage.build(len(self._players))
         self._bg = stage.render_surface()
         self._grid = gameGrid.GameGrid(stage.width, stage.height)
         self._renderer = stage.get_renderer()
@@ -96,11 +97,16 @@ class Game:
         for obj in stage.objects:
             id = self._grid.add_object(obj, check_collision=False)
             if isinstance(obj, gameTile.GameTile):
-                bounds = _expand_one(obj.tile_boundary, stage.width, stage.height)
+                tb = obj.tile_boundary
+                bounds = _expand_one(tb, stage.width, stage.height)
                 (x0,y0),(x1,y1) = bounds
                 for x in range(x0,x1+1):
                     for y in range(y0,y1+1):
-                        grid[x][y].append(id)
+                        if tb[0][0]<=x<=tb[1][0] and tb[0][1]<=y<=tb[1][1]: 
+                            grid[x][y].append(id)
+                        else:
+                            grid[x][y].insert(0,-id) 
+                            
             else:
                 controller = stage.controllers[controllers](id)
                 controllers += 1
@@ -127,4 +133,11 @@ class Game:
                 self._renderer.render_tank(surface, obj, time_step, colour=colour)
             else:
                 self._renderer.render_bullet(surface, obj, time_step, colour=None)
+
+        gz = constant.GRID_SIZE
+        for rect in temp:
+            path = pygame.Surface((gz,gz))
+            path.set_alpha(128)
+            path.fill((0,255,0))
+            surface.blit(path,rect)
         return surface

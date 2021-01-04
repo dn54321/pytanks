@@ -7,52 +7,53 @@ from src import keyBind, tankController, constant, bulletController
 from src.gameObjects import bullet
 from lib import VMath
 
+from src import game
+import pygame
+
 class PlayerController(tankController.TankController):
     def __init__(self, object_id):
         super().__init__(object_id)
         self._bit_key = keyBind.KeyBind()
-        self._tank_rotation = math.pi/45
-        self._nozzle_rotation = math.pi/90
-        self._timer = 0
         self._is_space = False
-        self._ammo = 3
         if __debug__: self._key = None
-
-    def forward(self, grid):
-        tank = grid.get_object(self._object_id)
-        if tank.velocity < 4: tank.velocity += 1
-        tank._distance += tank.velocity
-        grid.move_object(self.object_id, tank.velocity)
-
-    def idle(self, grid):
-        tank = grid.get_object(self._object_id)
-        if tank.velocity != 0: tank.velocity -= abs(tank.velocity)/tank.velocity
-        grid.move_object(self.object_id, tank.velocity)
-    
-    def reverse(self, grid):
-        tank = grid.get_object(self._object_id)
-        if tank.velocity > 0: tank.velocity -= 2
-        if tank.velocity <= 0: tank.velocity = -2
-        tank._distance += tank.velocity
-        grid.move_object(self.object_id, tank.velocity)
-    
-    def rotate_tank(self, grid, angle):
-        tank = grid.get_object(self._object_id)
-        grid.rotate_object(self.object_id, angle)
-
-    def rotate_nozzle(self, grid, angle):
-        tank = grid.get_object(self._object_id)
-        tank.nozzle_angle += angle
-
-    def shoot(self, grid):
-        tank = grid.get_object(self._object_id)
-        x,y = VMath.translate(tank.position, tank.nozzle_length, tank.nozzle_angle)
-        projectile = bullet.Bullet(x,y,tank.nozzle_angle)
-        id = grid.add_object(projectile)
-        if id: grid.add_controller(bulletController.BulletController(id, self))
+        self._ammo = 3
 
     def increment_ammo(self):
         self._ammo += 1
+
+    def beam(self, grid, pos, angle):
+        gz = constant.GRID_SIZE
+        x,y = pos
+        gx,gy = int(x/gz), int(y/gz)
+        h_angle = math.pi/2 - angle
+        vx,vy = math.sin(h_angle),math.cos(h_angle)
+        sx,sy = int(math.copysign(1,vx)), int(math.copysign(1,vy))
+        dx,dy = math.inf, math.inf
+        if round(vx,5): 
+            dx = (0.5*gz*(1+sx)-(x%gz))/vx
+            mxdx = gz/abs(vx)
+        if round(vy,5): 
+            dy = (0.5*gz*(1+sy)-(y%gz))/vy
+            mxdy = gz/abs(vy)
+
+        game.temp = []
+        while not self.check_solid(grid[gx,gy]):
+           # if angle not in self._amap[gx][gy]:
+           #     self._amap[gx][gy].append(angle)
+            if (dx < dy):
+                dx += mxdx
+                gx += sx
+            else:
+                dy += mxdy
+                gy += sy
+            game.temp.append((gx*gz,gy*gz))
+        game.temp.append((gx*gz,gy*gz))
+        self.check_solid(grid[gx,gy])
+
+    def check_solid(self, tile):
+        if tile: return tile._stationary and tile.solid
+        return False
+
         
     def update(self, grid):
         key = self._bit_key.get_keys()
@@ -85,6 +86,11 @@ class PlayerController(tankController.TankController):
         if key & constant.FIRE:
             if self._ammo and not (self.is_space or self._timer): 
                 self.shoot(grid)
+
+                tank = grid.get_object(self._object_id)
+                self.beam(grid, tank.position, tank.nozzle_angle)
+
+
                 self.is_space = True
                 self._timer = constant.TICKS/2
                 self._ammo -= 1

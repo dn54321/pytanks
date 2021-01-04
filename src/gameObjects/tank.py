@@ -13,7 +13,7 @@ class Tank(gameObject.GameObject):
         self._velocity = 0
         self._acceleration = 1
         self._terminal_velocity = 5
-        self._nozzle_angle = angle
+        self._nozzle_angle = 0
         self._nozzle_length = self._radius*1.5
         self.rotate(angle)
     

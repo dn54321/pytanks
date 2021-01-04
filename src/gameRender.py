@@ -47,7 +47,7 @@ class GameRender:
         tileset = utils.array_2d(rows, cols)
         for x in range(cols):
             for y in range(rows):
-                rect = pygame.Rect = (x*16, y*16, 16, 16)
+                rect = pygame.Rect(x*16, y*16, 16, 16)
                 tileset[x][y] = pygame.transform.scale2x(image.subsurface(rect))
                 #else: tileset[x][y] = image.subsurface(rect)
         return tileset
@@ -78,7 +78,7 @@ class GameRender:
 
     def render_tank(self, surface, tank, time_step, colour=None):
         tank_body = self.get_tank_sprite(colour, tank.frame)
-        tank_nozzle = self.get_tank_sprite(colour, 4)
+        tank_nozzle = self.get_tank_sprite(colour, 4)   
         self.render_entity(surface, tank_body, tank, time_step)
         self.render_entity(surface, tank_nozzle, tank, time_step, angle=tank.nozzle_angle, pivot=(-8,0))
 

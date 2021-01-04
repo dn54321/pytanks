@@ -81,15 +81,21 @@ class GameGrid:
     def get_map(self):
         return self._map
 
+    def get_width(self):
+        return self._width
+
+    def get_height(self):
+        return self._height
+
     ### Private Functions ###
     # gets the grid coordinates of the object.
     def _get_coords(self, obj):
         x,y = obj.position
         return int(x / constant.GRID_SIZE), int(y / constant.GRID_SIZE)
 
-    # gets objects listed in the grid at x,y.
-    def _get_tile_objects(self, x, y):
-        return [self._objects[id] for id in self._map[x][y]]
+    # gets objects listed in the grid at x,y and objects adjacent to x,y.
+    def _get_nearby_tiles(self, x, y):
+        return [self._objects[abs(id)] for id in self._map[x][y]]
 
     # gets objects that are within obj radius.
     def _get_circle_collisions(self, obj, vel=0):
@@ -104,7 +110,7 @@ class GameGrid:
         if dist >= 0: dir = constant.FORWARD
         else: dir = constant.REVERSE
         x,y = self._get_coords(obj)
-        tiles = self._get_tile_objects(x,y)
+        tiles = self._get_nearby_tiles(x,y)
         objs = self._get_circle_collisions(obj, dist)
         min_dist, collider, min_line = math.inf, None, None
         for obj1 in tiles + objs:
@@ -116,7 +122,7 @@ class GameGrid:
     # returns whether a collision occurred with this object
     def _check_collision(self, obj):
         x,y = self._get_coords(obj)
-        tiles = self._get_tile_objects(x,y)
+        tiles = self._get_nearby_tiles(x,y)
         objs = self._get_circle_collisions(obj)
         min_dist, collider = math.inf, None
         for obj1 in tiles + objs:
@@ -154,8 +160,16 @@ class GameGrid:
         x,y = VMath.subtract(line[0],line[1])
         l_angle = (math.atan2(y,x) + math.tau) % math.tau
         obj.rotate(2*(l_angle-obj.angle))
-        
+
+    def __getitem__(self,key):
+        i,j = key
+        if self._map[i][j] and self._map[i][j][-1]>0:
+            return self._objects[self._map[i][j][-1]]
+        else: return None
+
     ### property ###
     map = property(get_map)
     objects = property(get_objects)
     controllers = property(get_controllers)
+    width = property(get_width)
+    height = property(get_height)

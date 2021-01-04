@@ -5,12 +5,13 @@ import abc
 from lib import VMath
 
 class GameObject:
-    def __init__(self, x, y, hitbox, stationary=False):
+    def __init__(self, x, y, hitbox, stationary=False, solid=True):
         self._position = x, y
         self._hitbox = hitbox
         self._area = self._get_area()
         self._radius = self._get_radius()
         self._stationary = stationary
+        self._solid = solid
         self._angle = 0
 
         if not stationary:
@@ -69,6 +70,11 @@ class GameObject:
     def set_area(self, area):
         self._area = area
 
+    def is_solid(self):
+        return self._solid
+    def is_stationary(self):
+        return self._stationary
+
     def delete(self):
         return True
         
@@ -91,3 +97,5 @@ class GameObject:
     radius = property(get_radius, set_radius)
     angle = property(get_angle, set_angle)
     area = property(get_area, set_area)
+    solid = property(is_solid)
+    stationary = property(is_stationary)
