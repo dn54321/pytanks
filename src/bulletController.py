@@ -12,7 +12,7 @@ class BulletController(controller.Controller):
         else: grid.move_object(self._object_id, obj.velocity)
 
     def delete(self):
-        self._controller.increment_ammo()
+        self._controller.event_ammo_destroy()
 
     def update(self, grid):
         self.forward(grid)

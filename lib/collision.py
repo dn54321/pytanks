@@ -47,7 +47,7 @@ def get_distance(o1, o2, moving=constant.FORWARD):
     # Various angles
     a1 = o1.angle
     a2 = o2.angle
-    a1_r = (a1 + math.pi) % math.tau    # Obj Velocity Direction
+    a1_r = (a1 + math.pi) % math.tau    # Obj Velocity Direction (reverse)
     if moving: a1, a1_r = a1_r, a1             
 
     # Calculates and stores hitbox of objects for future use, saves recomputing.
@@ -55,35 +55,44 @@ def get_distance(o1, o2, moving=constant.FORWARD):
     hitbox_obj2 = o2.hitbox   # recalculate hitboxes, saving computing time.
 
     # Get points & lines of both objects that have the potential of colliding.
-    q = int(2*(a1-a2+3*math.pi)/math.pi%4) # Quadrant of points that will collide
+    #    1  |  0       
+    #   ---------      
+    #    2  |  3
+    #      
+    q = int(2*(a1-a2+3*math.pi)/math.pi%4) # Quadrant of points that will collide w/ o2
     h2 = hitbox_obj2[q:q+3] + hitbox_obj2[:max(q-1,0)]
     lines_o1 = [hitbox_obj1[1:3], (hitbox_obj1[0],hitbox_obj1[3])]
     lines_o2 = [h2[0:2], h2[1:3]]
     # Rays from o1 -> o2
     for i in lines_o1:
         for j in lines_o2:
-            p = line_intersection(i, j, limit=[i[moving],a1])
-            if p and _point_in_line(p, j):
-                distance = VMath.distance(p, i[moving])
-                if distance < min_dist: 
-                    c_line = j
+            p = line_intersection(i, j)
+            if p and _point_in_line(p,j): 
+                distance = _signed_distance(i[moving],p,a1)
+                if distance >= 0 and distance < min_dist: 
                     min_dist = distance
-            
+                    c_line = j
+
+    if not c_line: return math.inf, None
+
     # Rays from o2 -> o1
     l_o1 = hitbox_obj1[0+2*moving:2+2*moving]
-    l_o2 = [h2[1], hitbox_obj2[(q+3)%4]]
-    p = line_intersection(l_o2,l_o1, limit=[h2[1],a1_r])
-    if p and _point_in_line(p, l_o1):
-        distance = VMath.distance(p, h2[1])
-        if distance < min_dist: 
+    l_o2 = [h2[1], VMath.translate(h2[1], 1, a1)]
+    p = line_intersection(l_o2,l_o1)
+    if p and _point_in_line(p,l_o1):
+        distance = _signed_distance(p,h2[1],a1)
+        if distance >= 0 and distance < min_dist: 
             min_dist = distance
-            c_line = l_o2
-    if min_dist is not math.inf: min_dist = int(min_dist)
+            if VMath.distance(p, l_o1[0]) < VMath.distance(p, l_o1[1]):
+                c_line = lines_o2[moving]
+            else: c_line = lines_o2[1-moving]
+
+    if min_dist is not math.inf: min_dist = min_dist
     return min_dist, c_line
 
 # Returns the point of intersection of two lines
 # credit: Paul Draper from stack Overflow
-def line_intersection(line1, line2, limit=None):
+def line_intersection(line1, line2):
     xdiff = (line1[0][0] - line1[1][0], line2[0][0] - line2[1][0])
     ydiff = (line1[0][1] - line1[1][1], line2[0][1] - line2[1][1])
 
@@ -98,12 +107,53 @@ def line_intersection(line1, line2, limit=None):
     x = det(d, xdiff) / div
     y = det(d, ydiff) / div
 
-    p, dir = limit
-    if limit and not VMath.equals(p, (x,y)):
-        if _line_at_angle((p,(x,y)), dir): return x, y
-        else: return False    
-        
     return x, y
+
+# Returns the point of intersection of two lines defined by a point and it's angle
+# credit: Roobie Nuby from stack Overflow w/ modification
+# Note: this does not test for vertical cases no parrelel cases
+def line_intersection2(p1, a1, p2, a2):
+    m0 = math.tan(a1)
+    m1 = math.tan(a2)
+    x = ((m0*p1[0]-m1*p2[0])-(p1[1]-p2[1]))/(m0-m1)
+    return [x,m0*(x-p1[0])+p1[1]]
+
+def line_square(line, square):
+    for i in range(4):
+        square_line = [square[i],square[(i+1)%4]]
+        intersection = line_intersection(line, square_line)
+        if intersection:
+            if (_point_in_line(intersection, line) and 
+            _point_in_line(intersection, square_line)):
+                return intersection
+    return False
+
+# ref: http://mathworld.wolfram.com/Circle-LineIntersection.html
+# ref: https://stackoverflow.com/questions/30844482/what-is-most-efficient-way-to-find-the-intersection-of-a-line-and-a-circle-in-py
+def line_circle(line, circle_center, circle_radius,full_line=True, tangent_tol=1e-9):
+    pt1, pt2 = line
+    (p1x, p1y), (p2x, p2y), (cx, cy) = pt1, pt2, circle_center
+    (x1, y1), (x2, y2) = (p1x - cx, p1y - cy), (p2x - cx, p2y - cy)
+    dx, dy = (x2 - x1), (y2 - y1)
+    dr = (dx ** 2 + dy ** 2)**.5
+    big_d = x1 * y2 - x2 * y1
+    discriminant = circle_radius ** 2 * dr ** 2 - big_d ** 2
+
+    if discriminant < 0:  # No intersection between circle and line
+        return []
+    else:  # There may be 0, 1, or 2 intersections with the segment
+        intersections = [
+            (cx + (big_d * dy + sign * (-1 if dy < 0 else 1) * dx * discriminant**.5) / dr ** 2,
+             cy + (-big_d * dx + sign * abs(dy) * discriminant**.5) / dr ** 2)
+            for sign in ((1, -1) if dy < 0 else (-1, 1))]  # This makes sure the order along the segment is correct
+        if not full_line:  # If only considering the segment, filter out intersections that do not fall within the segment
+            fraction_along_segment = [(xi - p1x) / dx if abs(dx) > abs(dy) else (yi - p1y) / dy for xi, yi in intersections]
+            intersections = [pt for pt, frac in zip(intersections, fraction_along_segment) if 0 <= frac <= 1]
+        if len(intersections) == 2 and abs(discriminant) <= tangent_tol:  # If line is tangent to circle, return just one point (as both intersections have same location)
+            return [intersections[0]]
+        else:
+            return intersections
+
 
 ### PRIVATE FUNCTIONS ###
 
@@ -126,7 +176,10 @@ def _point_in_object(point, obj):
 # Determines whether a point exist within a line
 def _point_in_line(point, line):
     b,(a,c) = point,line
-    return abs(VMath.distance(a,b) + VMath.distance(b,c) - VMath.distance(a,c))<=1
+    d_ab = VMath.distance(a,b)
+    d_bc = VMath.distance(b,c)
+    d_ac = VMath.distance(a,c)
+    return not round(abs(d_ab + d_bc - d_ac), constant.PRECISION) 
 
 
 # Gets the edges of a square given it's points
@@ -142,6 +195,15 @@ def _area_triangle(p1,p2,p3):
     x2,y2=p2
     x3,y3=p3
     return abs((x2*y1-x1*y2)+(x3*y2-x2*y3)+(x1*y3-x3*y1))/2
+
+def _signed_distance(p1,p2,angle):
+    distance = round(VMath.distance(p1,p2), constant.PRECISION)
+    l_angle = math.atan2(p2[1]-p1[1],p2[0]-p1[0])
+    diff_angle = VMath.angle_diff(angle,l_angle)
+    if diff_angle > math.pi/2:
+        distance *= -1
+    return distance
+
     
 def _line_at_angle(line, angle):
     p1,p2=line
@@ -152,8 +214,7 @@ def _line_at_angle(line, angle):
     angle_diff = min(angle_diff, math.tau-angle_diff)
     if abs(angle_diff) <= math.pi/2:
         return True
-    return False
-    
+    return False    
 
 # appendix
 

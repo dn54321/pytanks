@@ -9,8 +9,9 @@ class Bullet(gameObject.GameObject):
         hitbox = [(w,-h), (w,h), (-w,h), (-w,-h)]
         super().__init__(x, y, hitbox)
         self._velocity = 10
-        self._bounce = 3
+        self._bounce = constant.BULLET_BOUNCE
         self.rotate(angle)
+      #  print(f"bullet spawn | position: {x}, {y}, angle: {angle}")
     
     def on_collide(self, o):
         if isinstance(o, Bullet): return constant.DESTRUCT

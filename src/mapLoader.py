@@ -28,7 +28,7 @@ class MapLoader:
     def load(self, url):
         with open('maps/' + url) as json_file:
             self._data = json.load(json_file)
-        self._data['orientation'] = [(math.tau+math.radians(90-x))%math.tau for x in self._data['orientation']]
+        self._data['orientation'] = [(math.radians(90-x))%math.tau for x in self._data['orientation']]
         name = self._data['name']
         width = self._data['width']
         height = self._data['height']

@@ -2,6 +2,8 @@
 from src import gameObjects, gameObject, gameTile, constant
 from src.gameObjects import bullet
 
+import math
+
 class Tank(gameObject.GameObject):
     def __init__(self, x, y, angle):
         sz = constant.TANK_SIZE/2
@@ -19,13 +21,16 @@ class Tank(gameObject.GameObject):
     
     def rotate(self, angle):
         super().rotate(angle)
-        self._nozzle_angle += angle
+        self.rotate_nozzle(angle)
+    
+    def rotate_nozzle(self, angle):
+        self._nozzle_angle = (self._nozzle_angle + angle) % math.tau
     
     def on_collide(self, o):
         if isinstance(o, gameTile.GameTile): 
             self._distance -= self._velocity
             return constant.REVERSE
-        if isinstance(o, bullet.Bullet): return constant.DESTRUCT
+        #if isinstance(o, bullet.Bullet): return constant.DESTRUCT
         return constant.REVERSE
 
     def get_velocity(self):

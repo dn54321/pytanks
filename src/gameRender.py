@@ -70,7 +70,7 @@ class GameRender:
         x1, y1 = entity.position
         x0, y0 = entity.old_position
         entity_pos = x0+(x1-x0)*time_step, y0+(y1-y0)*time_step
-        pos = VMath.subtract(entity_pos, center)
+        pos = VMath.subtract(entity.position, center)
 
         # Account for pivot
         pos = VMath.subtract(pos, VMath.rotate([pivot], angle)[0])

@@ -41,7 +41,7 @@ class GameGrid:
     def get_object(self, id):
             return self._objects[id]
 
-    # Gets all objects that exist in the grid.
+    # Gets all objects that exist in the grid.r
     def get_objects(self):
         return self._objects.values()
 
@@ -158,9 +158,11 @@ class GameGrid:
         if dist:
             obj.move(dist)
         x,y = VMath.subtract(line[0],line[1])
-        l_angle = (math.atan2(y,x) + math.tau) % math.tau
+        l_angle = math.atan2(y,x) % math.pi
+        #print(f"before collision ({obj.angle*180/math.pi}): {obj.hitbox}")
         obj.rotate(2*(l_angle-obj.angle))
-
+        #print(f"after collision ({obj.angle*180/math.pi}): {obj.hitbox}")
+        #print(f"actual bounce | pos: {obj.position}, angel: {obj.angle}")
     def __getitem__(self,key):
         i,j = key
         if self._map[i][j] and self._map[i][j][-1]>0:

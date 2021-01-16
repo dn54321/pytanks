@@ -2,10 +2,12 @@ from src import mapLoader, gameTile, gameGrid, constant, tankController
 from src.gameObjects import tank
 import time
 import pygame
+from lib import VMath
 # Private Helper functions
 size = [800, 800]
 screen = pygame.display.set_mode(size)
 temp = []
+line = []
 def _expand_one(bounds, width, height):
     x0,y0 = bounds[0]
     x1,y1 = bounds[1]
@@ -134,10 +136,15 @@ class Game:
             else:
                 self._renderer.render_bullet(surface, obj, time_step, colour=None)
 
+
+
         gz = constant.GRID_SIZE
-        for rect in temp:
+        for ff in temp:
             path = pygame.Surface((gz,gz))
             path.set_alpha(128)
-            path.fill((0,255,0))
-            surface.blit(path,rect)
+            path.fill(ff[2])
+            surface.blit(path,ff[0:2])
+        
+        for lin in line:
+            pygame.draw.line(surface, (0,0,0), lin[0], VMath.translate(lin[0],500,lin[1]))
         return surface

@@ -1,0 +1,28 @@
+{
+    "name": "Default Map",  
+    "width": 20,
+    "height": 20,
+    "map": [
+        "wwwwwwwwwwwwwwwwwwww",
+        "waaaaaaaaaaaaaaaaaaw",
+        "waaaaaaaaaaaaaaaaaaw",
+        "waaaaaaaaaaaaaaaaaaw",
+        "waaaaaaaaaaaawwaaaaw",
+        "waaaaaaaaaaaawwaaaaw",
+        "waaaaaapaaaaawwaaaaw",
+        "waaaaaaaaaaaaaaaaaaw",
+        "waaaaaaaaaaaaaaaaaaw",
+        "waaaaaaaaaaaaaaaaaaw",
+        "waaaaaaaaaaaaaaaaaaw",
+        "waaaaaaaaaaaaaaaaaaw",
+        "waaaaaaaaaaaaaaaaaaw",
+        "waaaaaaaaaaaaaaaaaaw",
+        "waaaaaaaaaaaaaaaaaaw",
+        "waaaaaaaaaaaaaaaaaaw",
+        "waaaaaaaaaaaaaaaaaaw",
+        "waaaaaaaaaaaaaaaaaaw",
+        "waaaaaaaaaaaaaaaaaaw",
+        "wwwwwwwwwwwwwwwwwwww"
+    ],
+    "orientation": [90]
+}   

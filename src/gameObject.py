@@ -22,7 +22,7 @@ class GameObject:
 
     def rotate(self, angle):
         self._hitbox = VMath.rotate(self._hitbox, angle)
-        self._angle = (math.tau + self._angle + angle) % math.tau
+        self._angle = (self._angle + angle) % math.tau
 
     def move(self, distance):
         self._old_position = self._position

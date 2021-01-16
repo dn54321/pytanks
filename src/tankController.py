@@ -34,7 +34,7 @@ class TankController(controller.Controller):
 
     def rotate_nozzle(self, grid, angle):
         tank = grid.get_object(self._object_id)
-        tank.nozzle_angle += angle
+        tank.rotate_nozzle(angle)
 
     def shoot(self, grid):
         tank = grid.get_object(self._object_id)
@@ -46,3 +46,7 @@ class TankController(controller.Controller):
     @abc.abstractmethod
     def update(self, grid):
         pass
+
+    # RUNS WHEN A BULLET GETS DESTROYED
+    def event_ammo_destroy(self):
+        return

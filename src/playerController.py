@@ -1,5 +1,6 @@
 # Python Libraries
 import math
+from math import sin, cos, tan
 import configparser
 
 # Project Libraries
@@ -18,45 +19,16 @@ class PlayerController(tankController.TankController):
         if __debug__: self._key = None
         self._ammo = 3
 
-    def increment_ammo(self):
+    def event_ammo_destroy(self):
         self._ammo += 1
-
-    def beam(self, grid, pos, angle):
-        gz = constant.GRID_SIZE
-        x,y = pos
-        gx,gy = int(x/gz), int(y/gz)
-        h_angle = math.pi/2 - angle
-        vx,vy = math.sin(h_angle),math.cos(h_angle)
-        sx,sy = int(math.copysign(1,vx)), int(math.copysign(1,vy))
-        dx,dy = math.inf, math.inf
-        if round(vx,5): 
-            dx = (0.5*gz*(1+sx)-(x%gz))/vx
-            mxdx = gz/abs(vx)
-        if round(vy,5): 
-            dy = (0.5*gz*(1+sy)-(y%gz))/vy
-            mxdy = gz/abs(vy)
-
-        game.temp = []
-        while not self.check_solid(grid[gx,gy]):
-           # if angle not in self._amap[gx][gy]:
-           #     self._amap[gx][gy].append(angle)
-            if (dx < dy):
-                dx += mxdx
-                gx += sx
-            else:
-                dy += mxdy
-                gy += sy
-            game.temp.append((gx*gz,gy*gz))
-        game.temp.append((gx*gz,gy*gz))
-        self.check_solid(grid[gx,gy])
 
     def check_solid(self, tile):
         if tile: return tile._stationary and tile.solid
         return False
-
-        
+   
     def update(self, grid):
         key = self._bit_key.get_keys()
+        tank = grid.get_object(self._object_id)
         if __debug__:
             '''
             if self._key is None:
@@ -69,6 +41,7 @@ class PlayerController(tankController.TankController):
             if self._keys:
                 key = self._keys.pop(0)
             '''
+
         vertical = constant.FORWARD | constant.REVERSE
         horizontal = constant.LEFT | constant.RIGHT
         nozzle_turn = constant.NOZZLE_LEFT | constant.NOZZLE_RIGHT
@@ -86,11 +59,6 @@ class PlayerController(tankController.TankController):
         if key & constant.FIRE:
             if self._ammo and not (self.is_space or self._timer): 
                 self.shoot(grid)
-
-                tank = grid.get_object(self._object_id)
-                self.beam(grid, tank.position, tank.nozzle_angle)
-
-
                 self.is_space = True
                 self._timer = constant.TICKS/2
                 self._ammo -= 1
