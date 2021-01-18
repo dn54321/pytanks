@@ -4,7 +4,7 @@ from math import sin, cos, tan
 import configparser
 
 # Project Libraries
-from src import keyBind, tankController, constant, bulletController
+from src import keyBind, tankController, constant, bulletController, gameTile
 from src.gameObjects import bullet
 from lib import VMath
 
@@ -21,12 +21,8 @@ class PlayerController(tankController.TankController):
 
     def event_ammo_destroy(self):
         self._ammo += 1
-
-    def check_solid(self, tile):
-        if tile: return tile._stationary and tile.solid
-        return False
    
-    def update(self, grid):
+    def update_logic(self, grid):
         key = self._bit_key.get_keys()
         tank = grid.get_object(self._object_id)
         if __debug__:

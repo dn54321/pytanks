@@ -9,7 +9,7 @@ class GameTile(gameObject.GameObject):
         self._tile_boundary = [(x0,y0),(x1,y1)]
         x,y = width*gz/2, height*gz/2
         hitbox = [(x,-y), (x,y), (-x,y), (-x,-y)]
-        super().__init__((x0+width/2)*gz, (y0+height/2)*gz, hitbox, stationary=True)
+        super().__init__((x0+width/2)*gz, (y0+height/2)*gz, hitbox)
 
     def get_tile_boundary(self):
         return self._tile_boundary

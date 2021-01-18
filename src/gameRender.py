@@ -64,13 +64,15 @@ class GameRender:
         else:
             i,j = sprite 
             tile = self._sprite_sheet[i][j].copy().convert_alpha()
-        if not angle: angle = entity.angle 
+        if not angle: a1, a2 = entity.old_angle, entity.angle
+        else: a1, a2 = angle[0], angle[1]
+        angle = a1 + VMath.angle_diff(a1,a2)*time_step 
         rot_tile = pygame.transform.rotate(tile, -math.degrees(angle))
         center = rot_tile.get_width()/2, rot_tile.get_height()/2
         x1, y1 = entity.position
         x0, y0 = entity.old_position
         entity_pos = x0+(x1-x0)*time_step, y0+(y1-y0)*time_step
-        pos = VMath.subtract(entity.position, center)
+        pos = VMath.subtract(entity_pos, center)
 
         # Account for pivot
         pos = VMath.subtract(pos, VMath.rotate([pivot], angle)[0])
@@ -80,7 +82,8 @@ class GameRender:
         tank_body = self.get_tank_sprite(colour, tank.frame)
         tank_nozzle = self.get_tank_sprite(colour, 4)   
         self.render_entity(surface, tank_body, tank, time_step)
-        self.render_entity(surface, tank_nozzle, tank, time_step, angle=tank.nozzle_angle, pivot=(-8,0))
+        angle = [tank.old_nozzle_angle, tank.nozzle_angle]
+        self.render_entity(surface, tank_nozzle, tank, time_step, angle=angle, pivot=(-8,0))
 
     def render_bullet(self, surface, bullet, time_step, colour=None):
         self.render_entity(surface, (5,0), bullet, time_step)

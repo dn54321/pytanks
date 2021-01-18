@@ -68,6 +68,7 @@ def normalize(point):
     dist = distance((0,0),point)
     return (x/dist,y/dist)
 
-def angle_diff(a1, a2):
+def angle_diff(a1, a2, signed=False):
+    if signed: return (a2 - a1 + math.pi) % 360 - math.pi;
     a=abs(a1-a2)%math.tau
     return min(a,math.tau-a)

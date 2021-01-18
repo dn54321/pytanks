@@ -13,7 +13,7 @@ def main():
     test_ai.set_colour((255,0,0))
     game_system.add_player(default_player)
     game_system.add_player(test_ai)
-    game_system.load_map('default.json')
+    game_system.load_map('square.json')
     game_system.assign_tanks()
     game_system.start()
 

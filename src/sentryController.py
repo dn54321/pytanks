@@ -4,7 +4,7 @@ import configparser
 from math import sin, cos, tan, copysign
 
 # Project Libraries
-from src import keyBind, tankController, constant, bulletController, playerController
+from src import keyBind, tankController, constant, bulletController, playerController, gameTile
 from src.gameObjects import bullet
 from lib import VMath, utils, collision
 
@@ -90,7 +90,7 @@ class SentryController(tankController.TankController):
         pts = VMath.sum(pos,offset[0]), VMath.sum(pos,offset[1])
         gpts = [int(pts[0][0]/gz),int(pts[0][1]/gz)],[int(pts[1][0]/gz),int(pts[1][1]/gz)]
 
-
+        '''
         ### DEBUGGER ###
         if bounce == constant.BULLET_BOUNCE: 
             game.temp = []
@@ -100,7 +100,7 @@ class SentryController(tankController.TankController):
         #print(f"b: {bounce}, l1: y-{pts[0][1]} = {math.tan(angle)}(x-{pts[0][0]})")
         #print(f"b: {bounce}, l2: y-{pts[1][1]} = {math.tan(angle)}(x-{pts[1][0]})")
         # Calculate direction vector
-
+        '''
         # Find velocity vector of the bullet
         h_angle = math.pi/2 - angle
         vx,vy = sin(h_angle),cos(h_angle)
@@ -212,7 +212,8 @@ class SentryController(tankController.TankController):
 
     # Determines if this is a tile and if the tile is a solid 
     def check_solid(self, tile):
-        if tile: return tile._stationary and tile.solid
+        if isinstance(tile, gameTile.GameTile):
+            return tile.solid
         return False
 
 
@@ -279,7 +280,8 @@ class SentryController(tankController.TankController):
 
 
 
-    def update(self, grid):
+    def update_logic(self, grid):
+        '''
         tank = grid.get_object(self._object_id)
         if self._setup:
             self.setup(grid)
@@ -299,8 +301,8 @@ class SentryController(tankController.TankController):
             angle_index = self._action[0]
             angle_diff = VMath.angle_diff(tank.nozzle_angle,math.radians(self._itoa[angle_index]))
             angle_diff = round(math.degrees(angle_diff))
-            print(f"tank: {math.degrees(tank.nozzle_angle)}, to_angle: {self._itoa[angle_index]}")
-            print(angle_diff)
+           # print(f"tank: {math.degrees(tank.nozzle_angle)}, to_angle: {self._itoa[angle_index]}")
+           # print(angle_diff)
             if self._moves[angle_diff] < self._moves[-angle_diff%360]: best_rotation = angle_diff
             else: best_rotation = -angle_diff%360
             best_move = self._move[best_rotation]
@@ -320,4 +322,5 @@ class SentryController(tankController.TankController):
             #print(tank._nozzle_angle)
             #self.beamV3(grid, tank.position, tank.nozzle_angle, tank.hitbox)
             #self.shoot(grid)
+        '''
     

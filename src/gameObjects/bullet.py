@@ -1,16 +1,16 @@
 # project libraries
-from src import gameObject, gameTile, constant
+from src import entity, gameTile, constant
 from src.gameObjects import tank
 
-class Bullet(gameObject.GameObject):
+class Bullet(entity.Entity):
     def __init__(self, x, y, angle):
         w,h = constant.BULLET_SIZE
         w,h = w/2, h/2
         hitbox = [(w,-h), (w,h), (-w,h), (-w,-h)]
-        super().__init__(x, y, hitbox)
+        super().__init__(x, y, angle, hitbox)
         self._velocity = 10
         self._bounce = constant.BULLET_BOUNCE
-        self.rotate(angle)
+        self.force_rotate(angle)
       #  print(f"bullet spawn | position: {x}, {y}, angle: {angle}")
     
     def on_collide(self, o):

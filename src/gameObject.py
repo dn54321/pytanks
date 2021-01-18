@@ -5,17 +5,13 @@ import abc
 from lib import VMath
 
 class GameObject:
-    def __init__(self, x, y, hitbox, stationary=False, solid=True):
+    def __init__(self, x, y, hitbox, solid=True):
         self._position = x, y
         self._hitbox = hitbox
         self._area = self._get_area()
         self._radius = self._get_radius()
-        self._stationary = stationary
         self._solid = solid
         self._angle = 0
-
-        if not stationary:
-            self._old_position = x,y
 
     def on_collide(self, o):
         pass
@@ -25,7 +21,6 @@ class GameObject:
         self._angle = (self._angle + angle) % math.tau
 
     def move(self, distance):
-        self._old_position = self._position
         self.position = VMath.translate(self.position, distance, self._angle)
 
     def get_hitbox(self, to_int=False, get_raw=False):
@@ -39,9 +34,6 @@ class GameObject:
     
     def set_hitbox(self, hitbox):
         self._hitbox = hitbox
-
-    def get_old_position(self):
-        return self._old_position
 
     def get_position(self):
         return self._position
@@ -60,9 +52,6 @@ class GameObject:
 
     def set_angle(self, angle):
         self._angle = angle
-
-    def is_stationary(self):
-        return self.stationary
         
     def get_area(self):
         return self._area
@@ -72,8 +61,6 @@ class GameObject:
 
     def is_solid(self):
         return self._solid
-    def is_stationary(self):
-        return self._stationary
 
     def delete(self):
         return True
@@ -93,9 +80,7 @@ class GameObject:
     # property
     hitbox = property(get_hitbox, set_hitbox)
     position = property(get_position, set_position)
-    old_position = property(get_old_position)
     radius = property(get_radius, set_radius)
     angle = property(get_angle, set_angle)
     area = property(get_area, set_area)
     solid = property(is_solid)
-    stationary = property(is_stationary)

@@ -160,7 +160,7 @@ class GameGrid:
         x,y = VMath.subtract(line[0],line[1])
         l_angle = math.atan2(y,x) % math.pi
         #print(f"before collision ({obj.angle*180/math.pi}): {obj.hitbox}")
-        obj.rotate(2*(l_angle-obj.angle))
+        obj.force_rotate(2*l_angle-obj.angle)
         #print(f"after collision ({obj.angle*180/math.pi}): {obj.hitbox}")
         #print(f"actual bounce | pos: {obj.position}, angel: {obj.angle}")
     def __getitem__(self,key):
