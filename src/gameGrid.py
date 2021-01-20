@@ -30,11 +30,14 @@ class GameGrid:
     def remove_object(self, id):
         obj = self._objects[id]
         obj.delete()
+        delete = True
         if not isinstance(obj, gameTile.GameTile):
-            self._controllers[id].delete()
-            del self._controllers[id]
-        del self._ids[self._objects[id]]
-        del self._objects[id]
+            if self._controllers[id].delete():
+                del self._controllers[id]
+            else: delete = False
+        if delete:
+            del self._ids[self._objects[id]]
+            del self._objects[id]
     
 
     # Gets an object from the grid.

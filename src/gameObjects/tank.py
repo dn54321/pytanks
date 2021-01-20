@@ -37,7 +37,7 @@ class Tank(entity.Entity):
         if isinstance(o, gameTile.GameTile): 
             self._distance -= self._velocity
             return constant.REVERSE
-        #if isinstance(o, bullet.Bullet): return constant.DESTRUCT
+        if isinstance(o, bullet.Bullet): return constant.DESTRUCT
         return constant.REVERSE
 
     def get_velocity(self):

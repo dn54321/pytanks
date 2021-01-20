@@ -54,6 +54,7 @@ class PlayerController(tankController.TankController):
         else: self.idle(grid)
         if key & constant.FIRE:
             if self._ammo and not (self.is_space or self._timer): 
+                self.beamV3(grid)
                 self.shoot(grid)
                 self.is_space = True
                 self._timer = constant.TICKS/2
