@@ -24,6 +24,11 @@ class Tank(entity.Entity):
         super().rotate(angle)
         self.rotate_nozzle(angle)
     
+    def force_rotate(self, angle):
+        super().force_rotate(angle)
+        self._nozzle_angle = angle
+        self._old_nozzle_angle = angle
+    
     def rotate_nozzle(self, angle):
         self._old_nozzle_angle = self._angle-self._old_angle+self._nozzle_angle
         self._nozzle_angle = (self._nozzle_angle + angle) % math.tau
@@ -55,6 +60,10 @@ class Tank(entity.Entity):
 
     def get_frame(self):
         return int(self._distance/8) % 4
+
+    def refresh(self):
+        super().refresh()
+        self._old_nozzle_angle = self._nozzle_angle
 
     # Property Class
     velocity = property(get_velocity, set_velocity)
