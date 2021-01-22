@@ -1,18 +1,20 @@
 # Uses singleton design pattern
 import configparser
+from lib import utils
 
 class Settings:
 
 
     _instance = None
     def __init__(self):
+        path = utils.resource_path('settings.ini')
         if Settings._instance is not None:
             self = Settings._instance
         else:
             Settings._instance = self
             self._config = configparser.ConfigParser()
             try: 
-                self._config.read('settings.ini')
+                self._config.read(path)
             except: 
                 self.generate_settings()
             self._actions = {
@@ -31,15 +33,16 @@ class Settings:
                 self._config['key_bindings'][key] = ' '
 
     def generate_settings(self):
+        path = utils.resource_path('settings.ini')
         print("[WARNING] Found corrupted or missing 'settings.ini'. Generating new file.")
         self._config['settings'] = {
             'max_fps': '60',
             'resolution': '500x600'
         }
         self._config['key_bindings']  = self._actions
-        with open('settings.ini', 'w') as config_file:
+        with utils.open_file('settings.ini', 'w') as config_file:
             self._config.write(config_file)
-        self._config.read('settings.ini')
+        self._config.read(path)
     def get_ord(self):
         try:
             keys = self._config['key_bindings']

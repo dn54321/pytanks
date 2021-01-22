@@ -26,7 +26,7 @@ class MapLoader:
         self._renderer = None
 
     def load(self, url):
-        with open('maps/' + url) as json_file:
+        with utils.open_file('maps\\' + url) as json_file:
             self._data = json.load(json_file)
         self._data['orientation'] = [(math.radians(90-x))%math.tau for x in self._data['orientation']]
         name = self._data['name']

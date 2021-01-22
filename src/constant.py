@@ -39,4 +39,5 @@ DOWN = 2
 
 # FILE LOCATIONS
 TILESET = "assets/tiles/sprites.png"
+FONTS = "assets/fonts/"
 TILE_RESOLUTION = 16

@@ -22,6 +22,7 @@ class Game:
         self._grid = None
         self._bg = pygame.display.set_mode(size)
         self._players = []
+        self._itop = {}
     def add_player(self, player):
         self._players.append(player)
 
@@ -79,7 +80,7 @@ class Game:
         pygame.display.flip()
 
     def draw_text(self, surface, val, hor):
-        font = pygame.font.Font(None, 20)
+        font = pygame.font.SysFont('arial', 20)
         text = font.render(val, 1, pygame.Color("coral"))
         surface.blit(text, (hor,0))
 
@@ -122,6 +123,7 @@ class Game:
         for player in self._players:
             id = controllers[i].get_object_id()
             player.assign_tank(id)
+            self._itop[id] = player
             i += offset
 
     def render_entities(self, tick, time_step):
@@ -131,8 +133,8 @@ class Game:
             controller = controllers[i]
             obj = self._grid.get_object(controller.object_id)
             if isinstance(obj, tank.Tank):
-                colour = self._players[i].colour
-                self._renderer.render_tank(surface, obj, time_step, colour=colour)
+                player = self._itop[controller.object_id]
+                self._renderer.render_tank(surface, obj, player, time_step)
             else:
                 self._renderer.render_bullet(surface, obj, time_step, colour=None)
 

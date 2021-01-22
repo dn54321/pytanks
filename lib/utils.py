@@ -1,4 +1,5 @@
 # Useful classes and/or functions for simple algorithms/data structures
+import os, sys
 
 # FUNCTIONS #
 def array_2d(index_1, index_2, default=None):
@@ -26,7 +27,17 @@ def matrix_transpose(arr, dims):
             arr_t[i][j] = arr[j][i]
     return arr_t
     
-    
-        
-        
-    
+def resource_path(relative_path):
+    """ Get the absolute path to the resource, works for dev and for PyInstaller """
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)
+
+def open_file(*args):
+    args = list(args)
+    args[0] = resource_path(args[0])
+    return open(*args)

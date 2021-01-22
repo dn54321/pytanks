@@ -4,3 +4,4 @@ __pycache__
 assets/*
 !assets/tiles/sprites.png
 test.py
+output

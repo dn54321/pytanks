@@ -26,6 +26,12 @@ class Player:
     def set_controller(self, controller):
         self._controller = controller
 
+    def get_name(self):
+        return self._name
+    
+    def set_name(self, name):
+        self._name = name
+
     # Updates the actions this player is trying to do w/ their tank.
     def update(self, grid):
         if tank_id != None:
@@ -35,5 +41,6 @@ class Player:
 
     # Property Class | Setters | Getters
     tank_id = property(get_tank_id, assign_tank)
+    name = property(get_name, set_name)
     colour = property(get_colour, set_colour)
     controller = property().setter(set_controller)

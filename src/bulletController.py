@@ -13,6 +13,7 @@ class BulletController(controller.Controller):
 
     def delete(self):
         self._controller.event_ammo_destroy()
+        return True 
 
     def update(self, grid):
         self.forward(grid)

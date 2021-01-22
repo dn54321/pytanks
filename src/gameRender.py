@@ -41,7 +41,8 @@ class GameRender:
 
     # Gets 16x16 textures and upscales to 32x32
     def get_tileset(self):
-        image = pygame.image.load(constant.TILESET).convert_alpha()
+        path = utils.resource_path(constant.TILESET)
+        image = pygame.image.load(path).convert_alpha()
         image_width, image_height = image.get_size()
         cols, rows = int(image_width/16), int(image_height/16)
         tileset = utils.array_2d(rows, cols)
@@ -78,12 +79,33 @@ class GameRender:
         pos = VMath.subtract(pos, VMath.rotate([pivot], angle)[0])
         surface.blit(rot_tile, pos)
 
-    def render_tank(self, surface, tank, time_step, colour=None):
+    def render_tank(self, surface, tank, player, time_step):
+        colour = player.colour
+        name = player.name
+        x,y = tank.position
         tank_body = self.get_tank_sprite(colour, tank.frame)
         tank_nozzle = self.get_tank_sprite(colour, 4)   
         self.render_entity(surface, tank_body, tank, time_step)
         angle = [tank.old_nozzle_angle, tank.nozzle_angle]
         self.render_entity(surface, tank_nozzle, tank, time_step, angle=angle, pivot=(-8,0))
+        self.render_text(surface, (x,y+20), name, 100, colour=(255,255,255), bold=True, background=(43,45,47,128))
+        #self.render_text()
+
+
+    def render_text(self, surface, pos, text, size, font="bit1.fon", colour=(0,0,0), background=None, centre=True, bold=False):
+        path = utils.resource_path(constant.FONTS + font)
+        pyfont = pygame.font.Font(path, size)
+        text = pyfont.render(text, True, colour)
+        rx,ry = text.get_rect()[2:4]
+        if centre: pos = pos[0] - text.get_rect().width*0.5, pos[1]
+        if background:
+            fill = 2
+            bg = pygame.Surface((rx+fill*2,ry+fill*2))
+            bg.fill(background)
+            if len(background) == 4: bg.set_alpha(background[-1])
+            surface.blit(bg, (pos[0]-fill,pos[1]-fill))
+        if bold: pyfont.set_bold(True)
+        surface.blit(text, pos)
 
     def render_bullet(self, surface, bullet, time_step, colour=None):
         self.render_entity(surface, (5,0), bullet, time_step)
