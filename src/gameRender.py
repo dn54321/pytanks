@@ -79,7 +79,7 @@ class GameRender:
         pos = VMath.subtract(pos, VMath.rotate([pivot], angle)[0])
         surface.blit(rot_tile, pos)
 
-    def render_tank(self, surface, tank, player, time_step):
+    def render_tank(self, surface, tank, player, time_step, show_name=False):
         colour = player.colour
         name = player.name
         x,y = tank.position
@@ -88,7 +88,8 @@ class GameRender:
         self.render_entity(surface, tank_body, tank, time_step)
         angle = [tank.old_nozzle_angle, tank.nozzle_angle]
         self.render_entity(surface, tank_nozzle, tank, time_step, angle=angle, pivot=(-8,0))
-        self.render_text(surface, (x,y+20), name, 100, colour=(255,255,255), bold=True, background=(43,45,47,128))
+        if show_name:
+            self.render_text(surface, (x,y+20), name, 100, colour=(255,255,255), bold=True, background=(43,45,47,128))
         #self.render_text()
 
 

@@ -1,6 +1,7 @@
 # Uses singleton design pattern
 import configparser
 from lib import utils
+import pygame
 
 class Settings:
 
@@ -9,7 +10,9 @@ class Settings:
     def __init__(self):
         path = utils.resource_path('settings.ini')
         if Settings._instance is not None:
-            self = Settings._instance
+            self._config = Settings._instance._config
+            self._action_config = Settings._instance._action_config
+            self._aciton = Settings._instance._actions
         else:
             Settings._instance = self
             self._config = configparser.ConfigParser()
@@ -17,20 +20,23 @@ class Settings:
                 self._config.read(path)
             except: 
                 self.generate_settings()
-            self._actions = {
+            self._action_config = {
+                'show_names': 'tab',
                 'accelerate': 'w',
                 'decelerate': 's',
                 'turn_left': 'a',
                 'turn_right': 'd',
                 'nozzle_left': 'j',
                 'nozzle_right': 'i',
-                'shoot': 'space'
+                'shoot': 'space',
+                'bomb': 'shift'
             }
             self._actions = ['accelerate', 'decelerate', 'turn_left', 'turn_right', 'shoot',
-                             'nozzle_left', 'nozzle_right']
+                             'bomb', 'nozzle_left', 'nozzle_right', 'show_names']
         for key, value in self._config['key_bindings'].items():
-            if value == 'space':
-                self._config['key_bindings'][key] = ' '
+            if value == "space": self._config['key_bindings'][key] = ' '
+            elif value == "tab": self._config['key_bindings'][key] = '\t'
+            elif value == "shift": self._config['key_bindings'][key] = "-"+str(pygame.K_LSHIFT)
 
     def generate_settings(self):
         path = utils.resource_path('settings.ini')
@@ -39,16 +45,20 @@ class Settings:
             'max_fps': '60',
             'resolution': '500x600'
         }
-        self._config['key_bindings']  = self._actions
+        self._config['key_bindings']  = self._action_config
         with utils.open_file('settings.ini', 'w') as config_file:
             self._config.write(config_file)
         self._config.read(path)
+
     def get_ord(self):
         try:
             keys = self._config['key_bindings']
             key_ords = []
             for action in self._actions:
-                key_ords.append(ord(keys[action]))
+                if keys[action].lstrip('-').isnumeric():
+                    key_ords.append(-1*int(keys[action]))
+                else:
+                    key_ords.append(ord(keys[action]))
         except configparser.Error:
             self.generate_settings()
             return get_ord()

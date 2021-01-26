@@ -1,4 +1,4 @@
-from src import mapLoader, gameTile, gameGrid, constant, tankController
+from src import mapLoader, gameTile, gameGrid, constant, tankController, keyBind
 from src.gameObjects import tank
 import time
 import pygame
@@ -23,6 +23,7 @@ class Game:
         self._bg = pygame.display.set_mode(size)
         self._players = []
         self._itop = {}
+        self._keybind = keyBind.KeyBind()
     def add_player(self, player):
         self._players.append(player)
 
@@ -129,12 +130,13 @@ class Game:
     def render_entities(self, tick, time_step):
         surface = self._bg.copy().convert_alpha()
         controllers = self._grid.get_controllers()
+        show_name = self._keybind.get_keys() & constant.SHOW_NAMES
         for i in range(len(controllers)):
             controller = controllers[i]
             obj = self._grid.get_object(controller.object_id)
             if isinstance(obj, tank.Tank):
                 player = self._itop[controller.object_id]
-                self._renderer.render_tank(surface, obj, player, time_step)
+                self._renderer.render_tank(surface, obj, player, time_step, show_name=show_name)
             else:
                 self._renderer.render_bullet(surface, obj, time_step, colour=None)
 

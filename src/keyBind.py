@@ -7,10 +7,17 @@ import src.settings as setting
 # External Libaries
 import pygame
 
-class KeyBind():
-    def __init__(self):
-        self._key_bind = setting.Settings().get_ord()
+# Uses singleton design pattern
 
+class KeyBind():
+    _instance = None
+    def __init__(self):
+        if KeyBind._instance is None:
+            self._key_bind = setting.Settings().get_ord()
+            KeyBind._instance = self
+        else:
+            self._key_bind = KeyBind._instance._key_bind
+            
     def get_keys(self):
         bitset = 0
         key_pressed = pygame.key.get_pressed()
