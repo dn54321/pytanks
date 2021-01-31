@@ -1,4 +1,4 @@
-from src import mapLoader, gameTile, gameGrid, constant, tankController, keyBind
+from src import mapLoader, gameTile, gameGrid, constant, tankController, keyBind, playerController
 from src.gameObjects import tank
 import time
 import pygame
@@ -43,15 +43,20 @@ class Game:
         fps = 0
         # Wait till the start of a tick cycle before running the clock
         ns = tick_length - (time.time_ns() % tick_length)
+        load_timer = time.time_ns() + ns + 3e9
         time.sleep(ns/1e9)
         while True:
-            tick = (tick + 1) % constant.TICKS
-            self.update_physics()
+            tick = (tick+1) % constant.TICKS
+            time_left = max(0,load_timer - time.time_ns())
+            if time_left: show_players = tick+1
+            else: 
+                show_players = False
+                self.update_physics()
             ns_start = ns = old_ns = time.time_ns() % tick_length
             while ns + delta_frame < tick_length:
                 current_time = ns-ns_start
                 time_left = tick_length-ns_start
-                self.draw(tick, current_time, time_left, fps)
+                self.draw(tick, current_time, time_left, fps, show_players)
                 pygame.event.pump()
                 ns = time.time_ns() % tick_length
                 delta_frame = ns - old_ns
@@ -72,9 +77,9 @@ class Game:
         self.draw_text(screen, str(tick), 30)
         pygame.display.flip()
     
-    def draw(self, tick, period, duration, fps):
+    def draw(self, tick, period, duration, fps, show_players):
         if period/duration > 1: print("ERROR")
-        surface = self.render_entities(tick, period/duration)
+        surface = self.render_entities(tick, period/duration, show_players)
         self.draw_text(surface, str(fps), 10)
         self.draw_text(surface, str(tick), 100)
         screen.blit(surface, (0,0))
@@ -127,16 +132,18 @@ class Game:
             self._itop[id] = player
             i += offset
 
-    def render_entities(self, tick, time_step):
+    def render_entities(self, tick, time_step, show_players):
         surface = self._bg.copy().convert_alpha()
         controllers = self._grid.get_controllers()
-        show_name = self._keybind.get_keys() & constant.SHOW_NAMES
+        show_name = (self._keybind.get_keys() & constant.SHOW_NAMES) | show_players
         for i in range(len(controllers)):
             controller = controllers[i]
             obj = self._grid.get_object(controller.object_id)
             if isinstance(obj, tank.Tank):
+                if isinstance(controller, playerController.PlayerController): arrow=show_players
+                else: arrow=False
                 player = self._itop[controller.object_id]
-                self._renderer.render_tank(surface, obj, player, time_step, show_name=show_name)
+                self._renderer.render_tank(surface, obj, player, time_step, show_name=show_name, show_arrow=arrow)
             else:
                 self._renderer.render_bullet(surface, obj, time_step, colour=None)
 

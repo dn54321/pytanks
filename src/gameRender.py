@@ -53,12 +53,14 @@ class GameRender:
                 #else: tileset[x][y] = image.subsurface(rect)
         return tileset
     
-    def render_tile(self, obj, x=None, y=None):
+    def render_tile(self, obj, x=None, y=None, surface=None):
         if x is None:
             x = self._cursor_pos[0]*constant.GRID_SIZE
             y = self._cursor_pos[1]*constant.GRID_SIZE
         i,j = obj
-        self._surface.blit(self._sprite_sheet[i][j], (x,y))
+        if surface is None: surface = self._surface
+        surface.blit(self._sprite_sheet[i][j], (x,y))
+        
         
     def render_entity(self, surface, sprite, entity, time_step, angle=None, pivot=[0,0]):
         if isinstance(sprite, pygame.Surface): tile = sprite
@@ -79,10 +81,11 @@ class GameRender:
         pos = VMath.subtract(pos, VMath.rotate([pivot], angle)[0])
         surface.blit(rot_tile, pos)
 
-    def render_tank(self, surface, tank, player, time_step, show_name=False):
+    def render_tank(self, surface, tank, player, time_step, show_name=False, show_arrow=False):
         colour = player.colour
         name = player.name
         x,y = tank.position
+        gz = constant.GRID_SIZE
         tank_body = self.get_tank_sprite(colour, tank.frame)
         tank_nozzle = self.get_tank_sprite(colour, 4)   
         self.render_entity(surface, tank_body, tank, time_step)
@@ -90,6 +93,9 @@ class GameRender:
         self.render_entity(surface, tank_nozzle, tank, time_step, angle=angle, pivot=(-8,0))
         if show_name:
             self.render_text(surface, (x,y+20), name, 100, colour=(255,255,255), bold=True, background=(43,45,47,128))
+        if show_arrow:
+            arrow_loc = (show_arrow+time_step-1)*math.tau/(constant.TICKS)
+            self.render_tile((5,2), x-gz*0.5, y-80+20*math.sin(arrow_loc), surface=surface)
         #self.render_text()
 
 
