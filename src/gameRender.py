@@ -92,14 +92,14 @@ class GameRender:
         angle = [tank.old_nozzle_angle, tank.nozzle_angle]
         self.render_entity(surface, tank_nozzle, tank, time_step, angle=angle, pivot=(-8,0))
         if show_name:
-            self.render_text(surface, (x,y+20), name, 100, colour=(255,255,255), bold=True, background=(43,45,47,128))
+            self.draw_text(surface, (x,y+20), name, 100, colour=(255,255,255), bold=True, background=(43,45,47,128))
         if show_arrow:
             arrow_loc = (show_arrow+time_step-1)*math.tau/(constant.TICKS)
             self.render_tile((5,2), x-gz*0.5, y-80+20*math.sin(arrow_loc), surface=surface)
         #self.render_text()
 
 
-    def render_text(self, surface, pos, text, size, font="bit1.fon", colour=(0,0,0), background=None, centre=True, bold=False):
+    def draw_text(self, surface, pos, text, size, font="bit1.fon", colour=(0,0,0), background=None, centre=True, bold=False):
         path = utils.resource_path(constant.FONTS + font)
         pyfont = pygame.font.Font(path, size)
         text = pyfont.render(text, True, colour)

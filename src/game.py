@@ -36,27 +36,37 @@ class Game:
 
     def start(self):
         tick = 0
+        total_ticks = 0
         delta_frame = 0
         tick_length = 1e+9/constant.TICKS
         frames = 0
         timer = 0
         fps = 0
+        loading_time = constant.TICKS*5
         # Wait till the start of a tick cycle before running the clock
         ns = tick_length - (time.time_ns() % tick_length)
         load_timer = time.time_ns() + ns + 3e9
         time.sleep(ns/1e9)
+        render = self._renderer
         while True:
-            tick = (tick+1) % constant.TICKS
-            time_left = max(0,load_timer - time.time_ns())
-            if time_left: show_players = tick+1
-            else: 
-                show_players = False
-                self.update_physics()
+            total_ticks += 1
+            tick = total_ticks % constant.TICKS
+            if loading_time: loading_time -= 1
+            else: self.update_physics()
             ns_start = ns = old_ns = time.time_ns() % tick_length
             while ns + delta_frame < tick_length:
-                current_time = ns-ns_start
-                time_left = tick_length-ns_start
-                self.draw(tick, current_time, time_left, fps, show_players)
+                period = (ns-ns_start)/(tick_length-ns_start) # Fraction, how long till end of tick
+                ##############################################
+
+                self.draw(total_ticks, period, loading_time)
+                w, h = size[0], size[1]
+                render.draw_text(screen, (w-300,10), "FPS: "+ str(fps), 500, colour=(255,255,0))
+                render.draw_text(screen, (w-200,10), "TICKS: "+ str(tick), 500, colour=(255,255,0))
+                if 0 < loading_time < constant.TICKS:
+                    pos = w/2, h/2
+                    render.draw_text(screen, pos, "- START -", 5000)
+                ##############################################
+                pygame.display.flip()
                 pygame.event.pump()
                 ns = time.time_ns() % tick_length
                 delta_frame = ns - old_ns
@@ -73,17 +83,11 @@ class Game:
         screen = pygame.display.set_mode(size).fill((255,255,255))
         for obj in self._grid.objects:
             pygame.draw.polygon(screen, (0,0,0), obj.get_hitbox(to_int=True))
-        self.draw_text(screen, str(int(clock.get_fps())), 10)
-        self.draw_text(screen, str(tick), 30)
-        pygame.display.flip()
     
-    def draw(self, tick, period, duration, fps, show_players):
-        if period/duration > 1: print("ERROR")
-        surface = self.render_entities(tick, period/duration, show_players)
-        self.draw_text(surface, str(fps), 10)
-        self.draw_text(surface, str(tick), 100)
+    def draw(self, tick, period, stage):
+        if period > 1: print("[Warning] Unstable Frames")
+        surface = self.render_entities(tick, period, stage)
         screen.blit(surface, (0,0))
-        pygame.display.flip()
 
     def draw_text(self, surface, val, hor):
         font = pygame.font.SysFont('arial', 20)
@@ -132,18 +136,17 @@ class Game:
             self._itop[id] = player
             i += offset
 
-    def render_entities(self, tick, time_step, show_players):
+    def render_entities(self, tick, time_step, stage):
         surface = self._bg.copy().convert_alpha()
         controllers = self._grid.get_controllers()
-        show_name = (self._keybind.get_keys() & constant.SHOW_NAMES) | show_players
+        show_name = (self._keybind.get_keys() & constant.SHOW_NAMES) | stage
         for i in range(len(controllers)):
             controller = controllers[i]
             obj = self._grid.get_object(controller.object_id)
             if isinstance(obj, tank.Tank):
-                if isinstance(controller, playerController.PlayerController): arrow=show_players
-                else: arrow=False
+                if not isinstance(controller, playerController.PlayerController): stage = False
                 player = self._itop[controller.object_id]
-                self._renderer.render_tank(surface, obj, player, time_step, show_name=show_name, show_arrow=arrow)
+                self._renderer.render_tank(surface, obj, player, time_step, show_name=show_name, show_arrow=stage)
             else:
                 self._renderer.render_bullet(surface, obj, time_step, colour=None)
 

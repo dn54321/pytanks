@@ -44,6 +44,8 @@ class TankController(controller.Controller):
         projectile = bullet.Bullet(x,y,tank.nozzle_angle)
         id = grid.add_object(projectile)
         if id: grid.add_controller(bulletController.BulletController(id, self))
+        else: return False
+        return True
 
     @abc.abstractmethod
     def update_logic(self, grid):
