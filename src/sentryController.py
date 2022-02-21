@@ -113,8 +113,6 @@ class SentryController(tankController.TankController):
 
 
     def update_logic(self, grid):
-        pass
-    '''
         tank = grid.get_object(self._object_id)
         if self._setup:
             self.setup(grid)
@@ -155,6 +153,5 @@ class SentryController(tankController.TankController):
             #print(tank._nozzle_angle)
             #self.beamV3(grid, tank.position, tank.nozzle_angle, tank.hitbox)
             #self.shoot(grid)
-    '''
         
     

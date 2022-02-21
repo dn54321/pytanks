@@ -55,7 +55,7 @@ class Game:
             else: self.update_physics()
             ns_start = ns = old_ns = time.time_ns() % tick_length
             while ns + delta_frame < tick_length:
-                period = (ns-ns_start)/(tick_length-ns_start) # Fraction, how long till end of tick
+                period = (ns)/(tick_length) # Fraction, how long till end of tick
                 ##############################################
 
                 self.draw(total_ticks, period, loading_time)
