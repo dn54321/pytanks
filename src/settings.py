@@ -12,7 +12,7 @@ class Settings:
         if Settings._instance is not None:
             self._config = Settings._instance._config
             self._action_config = Settings._instance._action_config
-            self._aciton = Settings._instance._actions
+            self._action = Settings._instance._actions
         else:
             Settings._instance = self
             self._config = configparser.ConfigParser()
@@ -29,14 +29,11 @@ class Settings:
                 'nozzle_left': 'j',
                 'nozzle_right': 'i',
                 'shoot': 'space',
-                'bomb': 'shift'
+                'bomb': 'left shift',
+                'menu': 'escape'
             }
             self._actions = ['accelerate', 'decelerate', 'turn_left', 'turn_right', 'shoot',
-                             'bomb', 'nozzle_left', 'nozzle_right', 'show_names']
-        for key, value in self._config['key_bindings'].items():
-            if value == "space": self._config['key_bindings'][key] = ' '
-            elif value == "tab": self._config['key_bindings'][key] = '\t'
-            elif value == "shift": self._config['key_bindings'][key] = "-"+str(pygame.K_LSHIFT)
+                             'bomb', 'nozzle_left', 'nozzle_right', 'show_names', 'menu']
 
     def generate_settings(self):
         path = utils.resource_path('settings.ini')
@@ -58,7 +55,9 @@ class Settings:
                 if keys[action].lstrip('-').isnumeric():
                     key_ords.append(-1*int(keys[action]))
                 else:
-                    key_ords.append(ord(keys[action]))
+                    print(keys[action])
+                    print(pygame.key.key_code(keys[action]))
+                    key_ords.append(pygame.key.key_code(keys[action]))
         except configparser.Error:
             self.generate_settings()
             return get_ord()

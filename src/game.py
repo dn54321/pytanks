@@ -36,29 +36,20 @@ class Game:
 
     def start(self):
         tick = 0
-        total_ticks = 0
-        delta_frame = 0
         tick_length = 1e+9/constant.TICKS
         frames = 0
-        timer = 0
         fps = 0
         loading_time = constant.TICKS*5
-        # Wait till the start of a tick cycle before running the clock
-        ns = tick_length - (time.time_ns() % tick_length)
-        load_timer = time.time_ns() + ns + 3e9
-        time.sleep(ns/1e9)
         render = self._renderer
         while True:
-            total_ticks += 1
-            tick = total_ticks % constant.TICKS
+            tick = (tick+1) % constant.TICKS
             if loading_time: loading_time -= 1
             else: self.update_physics()
-            ns_start = ns = old_ns = time.time_ns() % tick_length
-            while ns + delta_frame < tick_length:
-                period = (ns)/(tick_length) # Fraction, how long till end of tick
+            ns_start = ns = time.time_ns()
+            while ns-ns_start < tick_length:
+                period = min((ns-ns_start)/(tick_length), 1) # Fraction, how long till end of tick
                 ##############################################
-
-                self.draw(total_ticks, period, loading_time)
+                self.draw(period, loading_time)
                 w, h = size[0], size[1]
                 render.draw_text(screen, (w-300,10), "FPS: "+ str(fps), 500, colour=(255,255,0))
                 render.draw_text(screen, (w-200,10), "TICKS: "+ str(tick), 500, colour=(255,255,0))
@@ -68,15 +59,11 @@ class Game:
                 ##############################################
                 pygame.display.flip()
                 pygame.event.pump()
-                ns = time.time_ns() % tick_length
-                delta_frame = ns - old_ns
-                timer += delta_frame
+                ns = time.time_ns()
                 frames += 1
-                old_ns = ns
-                if timer > 1e9:
-                    fps = frames
-                    frames = timer = 0
-            time.sleep((tick_length-ns)/1e9)
+            if not tick:
+                fps = frames
+                frames = 0
 
     def draw_hitbox(self, tick, clock):
         clock.tick(constant.TICKS)
@@ -84,9 +71,8 @@ class Game:
         for obj in self._grid.objects:
             pygame.draw.polygon(screen, (0,0,0), obj.get_hitbox(to_int=True))
     
-    def draw(self, tick, period, stage):
-        if period > 1: print("[Warning] Unstable Frames")
-        surface = self.render_entities(tick, period, stage)
+    def draw(self, period, stage):
+        surface = self.render_entities(period, stage)
         screen.blit(surface, (0,0))
 
     def draw_text(self, surface, val, hor):
@@ -136,7 +122,7 @@ class Game:
             self._itop[id] = player
             i += offset
 
-    def render_entities(self, tick, time_step, stage):
+    def render_entities(self, time_step, stage):
         surface = self._bg.copy().convert_alpha()
         controllers = self._grid.get_controllers()
         show_name = (self._keybind.get_keys() & constant.SHOW_NAMES) | stage
