@@ -13,9 +13,13 @@ class Controller(abc.ABC):
     def delete(self):
         return True
 
-    @abc.abstractmethod
     def update(self, grid):
-        pass
+        entity = grid.get_object(self._object_id)
+        entity.refresh()
+        self.update_logic(grid)
 
+    @abc.abstractmethod
+    def update_logic(self, grid):
+        pass
     # property
     object_id = property(get_object_id, set_object_id)

@@ -30,7 +30,6 @@ class Tank(entity.Entity):
         self._old_nozzle_angle = angle
     
     def rotate_nozzle(self, angle):
-        self._old_nozzle_angle = self._angle-self._old_angle+self._nozzle_angle
         self._nozzle_angle = (self._nozzle_angle + angle) % math.tau
     
     def on_collide(self, o):

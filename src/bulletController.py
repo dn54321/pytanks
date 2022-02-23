@@ -15,5 +15,5 @@ class BulletController(controller.Controller):
         self._controller.event_ammo_destroy()
         return True 
 
-    def update(self, grid):
+    def update_logic(self, grid):
         self.forward(grid)

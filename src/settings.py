@@ -55,8 +55,6 @@ class Settings:
                 if keys[action].lstrip('-').isnumeric():
                     key_ords.append(-1*int(keys[action]))
                 else:
-                    print(keys[action])
-                    print(pygame.key.key_code(keys[action]))
                     key_ords.append(pygame.key.key_code(keys[action]))
         except configparser.Error:
             self.generate_settings()

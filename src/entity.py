@@ -7,7 +7,6 @@ class Entity(gameObject.GameObject):
         self._old_angle = angle
 
     def move(self, distance):
-        self._old_position = self._position
         if distance: super().move(distance)
     
     def teleport(self, position):
@@ -19,7 +18,6 @@ class Entity(gameObject.GameObject):
         self._old_angle = angle
         
     def rotate(self, angle):
-        self._old_angle = self._angle
         if angle: super().rotate(angle)
 
     def get_old_position(self):
