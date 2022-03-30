@@ -75,11 +75,12 @@ class GameRender:
         x1, y1 = entity.position
         x0, y0 = entity.old_position
         entity_pos = x0+(x1-x0)*time_step, y0+(y1-y0)*time_step
-        pos = VMath.subtract(entity_pos, center)
 
         # Account for pivot
-        pos = VMath.subtract(pos, VMath.rotate([pivot], angle)[0])
-        surface.blit(rot_tile, pos)
+        entity_pos = VMath.subtract(entity_pos, VMath.rotate([pivot], angle)[0])
+        
+        new_rect = rot_tile.get_rect(center = tile.get_rect(center = entity_pos).center)
+        surface.blit(rot_tile, new_rect)
 
     def render_tank(self, surface, tank, player, time_step, show_name=False, show_arrow=False):
         colour = player.colour
